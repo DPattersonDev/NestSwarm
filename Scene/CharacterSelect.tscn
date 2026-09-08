@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://b6dlw405q82uh"]
+
+[ext_resource type="Script" uid="uid://demrc5prhxe3g" path="res://Scene/character_select.gd" id="1_uiw7e"]
+
+[node name="CharacterSelect" type="Control" unique_id=749125110]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_uiw7e")

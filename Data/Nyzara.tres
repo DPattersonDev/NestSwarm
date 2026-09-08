@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://dgej8ivx7car4"]
+
+[ext_resource type="Script" uid="uid://csfalalb5rkse" path="res://scripts/character_data.gd" id="1_wl3ta"]
+
+[resource]
+script = ExtResource("1_wl3ta")
+character_name = "Nyzara"
+faction = "Scolyra"
+class_role = "Fighter"
+max_health = 105
+damage = 19
+move_speed = 105.0
+attack_range = 55.0
+attack_cooldown = 0.8
+basic_attack_style = "Fast Stinging blades"
+unique_ability = "Soldier Carapace"
+metadata/_custom_type_script = "uid://csfalalb5rkse"

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://bj00tdb205anf"]
+
+[ext_resource type="Script" uid="uid://csfalalb5rkse" path="res://scripts/character_data.gd" id="1_w1qdm"]
+
+[resource]
+script = ExtResource("1_w1qdm")
+character_name = "Melora"
+faction = "Vesper"
+class_role = "Support"
+max_health = 150
+damage = 7
+move_speed = 70.0
+attack_range = 190.0
+attack_cooldown = 0.95
+basic_attack_style = "Honey Energy Bolts"
+unique_ability = "Royal Nectar"
+metadata/_custom_type_script = "uid://csfalalb5rkse"

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://cus7isduqlh72"]
+
+[ext_resource type="Script" uid="uid://csfalalb5rkse" path="res://scripts/character_data.gd" id="1_5giny"]
+
+[resource]
+script = ExtResource("1_5giny")
+character_name = "Karnyx"
+faction = "Formicara"
+class_role = "Vanguard"
+max_health = 210
+damage = 8
+move_speed = 60.0
+attack_range = 65.0
+attack_cooldown = 1.1
+basic_attack_style = "Fast Stinging blades"
+unique_ability = "Soldier Carapace"
+metadata/_custom_type_script = "uid://csfalalb5rkse"

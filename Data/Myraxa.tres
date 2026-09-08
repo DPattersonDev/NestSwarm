@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://d3yale1iwcnlr"]
+
+[ext_resource type="Script" uid="uid://csfalalb5rkse" path="res://scripts/character_data.gd" id="1_5sxvp"]
+
+[resource]
+script = ExtResource("1_5sxvp")
+character_name = "Myraxa"
+faction = "Formicara"
+class_role = "Support"
+max_health = 160
+damage = 7
+move_speed = 65.0
+attack_range = 180.0
+attack_cooldown = 1.08
+basic_attack_style = "Fast Stinging blades"
+unique_ability = "Colony Aid "
+metadata/_custom_type_script = "uid://csfalalb5rkse"

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://cn5kcbkek6rv6"]
+
+[ext_resource type="Script" uid="uid://csfalalb5rkse" path="res://scripts/character_data.gd" id="1_4ao1f"]
+
+[resource]
+script = ExtResource("1_4ao1f")
+character_name = "Mavros"
+faction = "Lepidra"
+class_role = "Fighter"
+max_health = 165
+damage = 14
+move_speed = 84.0
+attack_range = 75.0
+attack_cooldown = 0.95
+basic_attack_style = "Fast Stinging blades"
+unique_ability = "NightFall"
+metadata/_custom_type_script = "uid://csfalalb5rkse"

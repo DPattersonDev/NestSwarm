@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://bf30gcsau0wal"]
+
+[ext_resource type="Script" uid="uid://csfalalb5rkse" path="res://scripts/character_data.gd" id="1_b60l5"]
+
+[resource]
+script = ExtResource("1_b60l5")
+character_name = "Aurex"
+faction = "Vesper"
+class_role = "Marksman"
+max_health = 130
+damage = 13
+move_speed = 72.0
+attack_range = 260.0
+attack_cooldown = 0.92
+basic_attack_style = "Venom needle strikes "
+unique_ability = "Wax Guard"
+metadata/_custom_type_script = "uid://csfalalb5rkse"

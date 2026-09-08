@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://8fqmbg5ke1d0"]
+
+[ext_resource type="Script" uid="uid://csfalalb5rkse" path="res://scripts/character_data.gd" id="1_toacl"]
+
+[resource]
+script = ExtResource("1_toacl")
+character_name = "Velkara"
+faction = "Anttalope"
+class_role = "Support"
+max_health = 140
+damage = 11
+move_speed = 70.0
+attack_range = 180.0
+attack_cooldown = 1.05
+basic_attack_style = "Crescent Blade Projectiles"
+unique_ability = "Marked Prey"
+metadata/_custom_type_script = "uid://csfalalb5rkse"

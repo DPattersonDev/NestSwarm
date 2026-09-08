@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://cmaj8hupb8nm0"]
+
+[ext_resource type="Script" uid="uid://csfalalb5rkse" path="res://scripts/character_data.gd" id="1_21fro"]
+[ext_resource type="Texture2D" uid="uid://qod6egdmuuha" path="res://Data/Veyra.png.png" id="1_beceg"]
+
+[resource]
+script = ExtResource("1_21fro")
+character_name = "Veyra"
+battle_texture = ExtResource("1_beceg")
+faction = "Vesper"
+class_role = "Vanguard"
+max_health = 205
+damage = 8
+move_speed = 64.0
+attack_range = 65.0
+basic_attack_style = "Heavy Spear Thrust"
+unique_ability = "Wax Guard"
+metadata/_custom_type_script = "uid://csfalalb5rkse"

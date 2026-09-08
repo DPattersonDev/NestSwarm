@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://gbgh3fig3dx7"]
+
+[ext_resource type="Script" uid="uid://csfalalb5rkse" path="res://scripts/character_data.gd" id="1_0ah6l"]
+
+[resource]
+script = ExtResource("1_0ah6l")
+character_name = "Droven"
+faction = "Anttalope"
+class_role = "Vanguard"
+max_health = 205
+damage = 11
+move_speed = 63.0
+attack_cooldown = 1.06
+basic_attack_style = "Heavy Mantis Arm Strikes"
+unique_ability = "Guarded Stance"
+metadata/_custom_type_script = "uid://csfalalb5rkse"

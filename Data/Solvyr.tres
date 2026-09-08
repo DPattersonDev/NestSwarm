@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://crrom18i1f5qm"]
+
+[ext_resource type="Script" uid="uid://csfalalb5rkse" path="res://scripts/character_data.gd" id="1_ulaxa"]
+
+[resource]
+script = ExtResource("1_ulaxa")
+character_name = "Solvyr"
+faction = "Lepidra"
+class_role = "Marksman"
+max_health = 125
+damage = 14
+move_speed = 80.0
+attack_range = 290.0
+attack_cooldown = 0.98
+basic_attack_style = "Fast Stinging blades"
+unique_ability = "MoonBeam"
+metadata/_custom_type_script = "uid://csfalalb5rkse"

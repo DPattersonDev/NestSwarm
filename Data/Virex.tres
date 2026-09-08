@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://tid2qlhntn1v"]
+
+[ext_resource type="Script" uid="uid://csfalalb5rkse" path="res://scripts/character_data.gd" id="1_fdoue"]
+
+[resource]
+script = ExtResource("1_fdoue")
+character_name = "Virex"
+faction = "Caraphex"
+class_role = "Assassin"
+max_health = 140
+damage = 18
+move_speed = 85.0
+attack_range = 60.0
+attack_cooldown = 0.98
+basic_attack_style = "Fast Stinging blades"
+unique_ability = "Soldier Carapace"
+metadata/_custom_type_script = "uid://csfalalb5rkse"

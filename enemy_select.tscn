@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://ssjg2w0dn1qm"]
+
+[ext_resource type="Script" uid="uid://bovtrq48jjdtv" path="res://enemy_select.gd" id="1_xvew3"]
+
+[node name="EnemySelect" type="Control" unique_id=2004627430]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_xvew3")

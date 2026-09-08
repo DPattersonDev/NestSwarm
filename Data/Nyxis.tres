@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://bbnafairoa827"]
+
+[ext_resource type="Script" uid="uid://csfalalb5rkse" path="res://scripts/character_data.gd" id="1_rml6t"]
+
+[resource]
+script = ExtResource("1_rml6t")
+character_name = "Nyxis"
+faction = "Anttalope"
+class_role = "Marksman"
+max_health = 120
+damage = 17
+move_speed = 70.0
+attack_range = 250.0
+attack_cooldown = 1.02
+basic_attack_style = "Acid Dart Shorts"
+unique_ability = "Corrosive shots"
+metadata/_custom_type_script = "uid://csfalalb5rkse"

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://c80b12yxkyh2s"]
+
+[ext_resource type="Script" uid="uid://csfalalb5rkse" path="res://scripts/character_data.gd" id="1_gkhvm"]
+
+[resource]
+script = ExtResource("1_gkhvm")
+character_name = "Aurelia"
+faction = "Caraphex"
+class_role = "Support"
+max_health = 175
+damage = 8
+move_speed = 60.0
+attack_range = 175.0
+attack_cooldown = 1.12
+basic_attack_style = "Fast Stinging blades"
+unique_ability = "Soldier Carapace"
+metadata/_custom_type_script = "uid://csfalalb5rkse"

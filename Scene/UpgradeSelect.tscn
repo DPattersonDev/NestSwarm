@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://dpxm1k1671bav"]
+
+[ext_resource type="Script" uid="uid://dmm6c2po6tmk1" path="res://Scene/upgrade_select.gd" id="1_wdbcr"]
+
+[node name="UpgradeSelect" type="Control" unique_id=842908172]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_wdbcr")

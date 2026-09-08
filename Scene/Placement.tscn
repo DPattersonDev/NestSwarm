@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://c35vd8b1gjxt"]
+
+[ext_resource type="Script" uid="uid://bq5imc67fkdx2" path="res://Scene/placement.gd" id="1_jhsq3"]
+
+[node name="Placement" type="Control" unique_id=1455309060]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_jhsq3")

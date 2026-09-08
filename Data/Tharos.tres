@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://ophskltrmine"]
+
+[ext_resource type="Script" uid="uid://csfalalb5rkse" path="res://scripts/character_data.gd" id="1_212lf"]
+
+[resource]
+script = ExtResource("1_212lf")
+character_name = "Tharos"
+faction = "Vesper"
+class_role = "Fighter"
+max_health = 170
+damage = 13
+move_speed = 77.0
+attack_cooldown = 0.9
+basic_attack_style = "Twin hook blade"
+unique_ability = "Frenzy wings "
+metadata/_custom_type_script = "uid://csfalalb5rkse"

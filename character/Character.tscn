@@ -1,0 +1,29 @@
+[gd_scene format=3 uid="uid://iofvfi0lm13j"]
+
+[ext_resource type="Script" uid="uid://ohn3hmyp3vf2" path="res://scripts/character.gd" id="1_dpp5g"]
+[ext_resource type="Texture2D" uid="uid://kqt8kv4qpu7s" path="res://character/Veyra/Veyra.png.png" id="2_r2475"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1xu5b"]
+size = Vector2(60, 60)
+
+[node name="CharacterBody2D" type="CharacterBody2D" unique_id=137325416 groups=["Characters"]]
+collision_mask = 0
+script = ExtResource("1_dpp5g")
+damage = 20
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=2032212434]
+offset_left = -30.0
+offset_top = -30.0
+offset_right = 30.0
+offset_bottom = 30.0
+color = Color(0.085144766, 0.31097454, 0.8638736, 1)
+
+[node name="BattleSprite" type="Sprite2D" parent="." unique_id=1904770714]
+z_index = 1
+texture = ExtResource("2_r2475")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2092940696]
+position = Vector2(1, 76)
+shape = SubResource("RectangleShape2D_1xu5b")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=803022400]

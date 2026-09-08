@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://8ugm4716iymi"]
+
+[ext_resource type="Script" uid="uid://csfalalb5rkse" path="res://scripts/character_data.gd" id="1_fdm3b"]
+
+[resource]
+script = ExtResource("1_fdm3b")
+character_name = "Syrra"
+faction = "Anttalope"
+class_role = "Assassin"
+max_health = 110
+damage = 21
+move_speed = 97.0
+attack_range = 55.0
+attack_cooldown = 0.92
+basic_attack_style = "Leap and slice attacks"
+unique_ability = "Ambush Instinct"
+metadata/_custom_type_script = "uid://csfalalb5rkse"

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://blgmrygigoa1m"]
+
+[ext_resource type="Script" uid="uid://csfalalb5rkse" path="res://scripts/character_data.gd" id="1_nrmic"]
+
+[resource]
+script = ExtResource("1_nrmic")
+character_name = "Vorren"
+faction = "Lepidra"
+class_role = "Vanguard"
+max_health = 200
+damage = 9
+move_speed = 69.0
+attack_range = 65.0
+attack_cooldown = 1.05
+basic_attack_style = "Fast Stinging blades"
+unique_ability = "Powdered Wings"
+metadata/_custom_type_script = "uid://csfalalb5rkse"

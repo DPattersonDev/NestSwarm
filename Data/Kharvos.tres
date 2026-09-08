@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://opdhyvx316u"]
+
+[ext_resource type="Script" uid="uid://csfalalb5rkse" path="res://scripts/character_data.gd" id="1_hj8v5"]
+
+[resource]
+script = ExtResource("1_hj8v5")
+character_name = "Kharvos"
+faction = "Caraphex"
+class_role = "Fighter"
+max_health = 195
+damage = 14
+move_speed = 65.0
+attack_range = 75.0
+attack_cooldown = 1.03
+basic_attack_style = "Fast Stinging blades"
+unique_ability = "Soldier Carapace"
+metadata/_custom_type_script = "uid://csfalalb5rkse"

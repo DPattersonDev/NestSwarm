@@ -1,0 +1,13 @@
+[gd_scene format=3 uid="uid://dfx3h0t45p75n"]
+
+[ext_resource type="Script" uid="uid://f0b8nhx0orf6" path="res://game.gd" id="1_80nbo"]
+[ext_resource type="Texture2D" uid="uid://cd63os4o5toeg" path="res://Art/Arenas/Vesper/vesper_arena_placeholder.png" id="2_e2o6t"]
+
+[node name="Game" type="Node2D" unique_id=1019461165]
+script = ExtResource("1_80nbo")
+
+[node name="AreanaBackground" type="Sprite2D" parent="." unique_id=1582840871]
+z_index = -10
+position = Vector2(493.5, 342.25)
+scale = Vector2(1.0113636, 1.0579171)
+texture = ExtResource("2_e2o6t")

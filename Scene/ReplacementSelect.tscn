@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://d4k0vx34ny5t1"]
+
+[ext_resource type="Script" uid="uid://b74pbrdj46vlx" path="res://Scene/replacement_select.gd" id="1_dlymt"]
+
+[node name="ReplacementSelect" type="Control" unique_id=1242555264]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_dlymt")

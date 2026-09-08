@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://lp72heus2kup"]
+
+[ext_resource type="Script" uid="uid://csfalalb5rkse" path="res://scripts/character_data.gd" id="1_ntxiv"]
+
+[resource]
+script = ExtResource("1_ntxiv")
+character_name = "Brontis"
+faction = "Caraphex"
+class_role = "Vanguard"
+max_health = 240
+damage = 9
+move_speed = 55.0
+attack_range = 60.0
+attack_cooldown = 1.12
+basic_attack_style = "Fast Stinging blades"
+unique_ability = "Soldier Carapace"
+metadata/_custom_type_script = "uid://csfalalb5rkse"
