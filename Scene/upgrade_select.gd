@@ -17,6 +17,10 @@ var selected_this_round: Dictionary = {}
 
 var upgrade_buttons: Array[Button] = []
 
+# One moving shine strip per upgrade button.
+# Only visible when that button is showing a Special.
+var upgrade_shines: Array[ColorRect] = []
+
 
 # =========================================================
 # REPLACEMENT CATCH-UP STATE
@@ -31,10 +35,6 @@ var timer_finished: bool = false
 
 # Prevents the upgrade phase from being
 # completed more than once.
-#
-# This protects against the timer reaching
-# zero on the same frame as the player's
-# final upgrade selection.
 var upgrade_phase_finished: bool = false
 
 
@@ -43,6 +43,36 @@ var upgrade_phase_finished: bool = false
 # =========================================================
 
 const MIN_ATTACK_COOLDOWN: float = 0.25
+
+
+# =========================================================
+# CARD COLORS
+# =========================================================
+#
+# Special = Gold
+# Class   = Green
+# Item    = Crimson / Red
+# =========================================================
+
+const SPECIAL_NORMAL_COLOR: Color = Color(0.24, 0.18, 0.05, 1.0)
+const SPECIAL_HOVER_COLOR: Color = Color(0.32, 0.24, 0.07, 1.0)
+const SPECIAL_PRESSED_COLOR: Color = Color(0.18, 0.13, 0.04, 1.0)
+const SPECIAL_BORDER_COLOR: Color = Color(0.92, 0.73, 0.22, 1.0)
+
+const CLASS_NORMAL_COLOR: Color = Color(0.07, 0.20, 0.10, 1.0)
+const CLASS_HOVER_COLOR: Color = Color(0.09, 0.27, 0.13, 1.0)
+const CLASS_PRESSED_COLOR: Color = Color(0.05, 0.15, 0.07, 1.0)
+const CLASS_BORDER_COLOR: Color = Color(0.25, 0.78, 0.38, 1.0)
+
+const ITEM_NORMAL_COLOR: Color = Color(0.22, 0.07, 0.07, 1.0)
+const ITEM_HOVER_COLOR: Color = Color(0.30, 0.09, 0.09, 1.0)
+const ITEM_PRESSED_COLOR: Color = Color(0.16, 0.05, 0.05, 1.0)
+const ITEM_BORDER_COLOR: Color = Color(0.78, 0.24, 0.24, 1.0)
+
+const NEUTRAL_NORMAL_COLOR: Color = Color(0.16, 0.16, 0.16, 1.0)
+const NEUTRAL_HOVER_COLOR: Color = Color(0.20, 0.20, 0.20, 1.0)
+const NEUTRAL_PRESSED_COLOR: Color = Color(0.12, 0.12, 0.12, 1.0)
+const NEUTRAL_BORDER_COLOR: Color = Color(0.33, 0.33, 0.33, 1.0)
 
 
 # =========================================================
@@ -82,9 +112,7 @@ func _ready() -> void:
 
 	create_upgrade_ui()
 
-
 	check_for_replacement_catchup()
-
 
 	show_current_character()
 
@@ -113,7 +141,6 @@ func _process(
 
 
 	timer_finished = true
-
 
 	auto_complete_remaining_upgrades()
 
@@ -151,14 +178,8 @@ func check_for_replacement_catchup() -> void:
 			== GameState.replacement_character_name
 		):
 
-			catchup_character_index = (
-				i
-			)
-
-			current_character_index = (
-				i
-			)
-
+			catchup_character_index = i
+			current_character_index = i
 			catchup_mode = true
 
 			return
@@ -412,6 +433,22 @@ func create_upgrade_ui() -> void:
 		)
 
 
+		# Keep long upgrade descriptions inside the card instead of
+		# forcing the Button/VBoxContainer to grow wider than the layout.
+		button.autowrap_mode = (
+			TextServer.AUTOWRAP_WORD_SMART
+		)
+
+
+		# Without this, Godot makes the Button wide enough to fit the
+		# longest line of text. That was stretching the entire upgrade
+		# screen across the ledger again.
+		button.clip_text = true
+
+
+		button.clip_contents = true
+
+
 		button.pressed.connect(
 			_on_upgrade_button_pressed.bind(
 				i
@@ -429,9 +466,103 @@ func create_upgrade_ui() -> void:
 		)
 
 
+		# =================================================
+		# SPECIAL CARD SHINE
+		# =================================================
+
+		var shine = ColorRect.new()
+
+		shine.color = Color(
+			1.0,
+			0.92,
+			0.58,
+			0.12
+		)
+
+
+		shine.size = Vector2(
+			75,
+			180
+		)
+
+
+		shine.position = Vector2(
+			-100,
+			-30
+		)
+
+
+		shine.rotation_degrees = 12.0
+
+		shine.mouse_filter = (
+			Control.MOUSE_FILTER_IGNORE
+		)
+
+		shine.visible = false
+
+
+		button.add_child(
+			shine
+		)
+
+
+		upgrade_shines.append(
+			shine
+		)
+
+
+		start_special_shine_animation(
+			shine
+		)
+
+
 	create_upgrade_ledger()
 
 	update_timer_display()
+
+
+# =========================================================
+# SPECIAL SHINE ANIMATION
+# =========================================================
+
+func start_special_shine_animation(
+	shine: ColorRect
+) -> void:
+
+	var tween = (
+		create_tween()
+	)
+
+
+	tween.set_loops()
+
+
+	tween.tween_interval(
+		0.7
+	)
+
+
+	tween.tween_property(
+		shine,
+		"position:x",
+		720.0,
+		1.0
+	).set_trans(
+		Tween.TRANS_SINE
+	).set_ease(
+		Tween.EASE_IN_OUT
+	)
+
+
+	tween.tween_interval(
+		1.2
+	)
+
+
+	tween.tween_callback(
+		func():
+			shine.position.x = -100.0
+	)
 
 
 # =========================================================
@@ -450,13 +581,13 @@ func create_upgrade_ledger() -> void:
 
 	ledger_panel.position = Vector2(
 		890,
-		120
+		105
 	)
 
 
 	ledger_panel.size = Vector2(
 		230,
-		370
+		470
 	)
 
 
@@ -551,7 +682,7 @@ func create_upgrade_ledger() -> void:
 
 	ledger_stats_label.custom_minimum_size = Vector2(
 		205,
-		105
+		102
 	)
 
 
@@ -598,7 +729,7 @@ func create_upgrade_ledger() -> void:
 
 	ledger_ability_label.custom_minimum_size = Vector2(
 		205,
-		60
+		120
 	)
 
 
@@ -650,7 +781,7 @@ func create_upgrade_ledger() -> void:
 
 	ledger_upgrades_label.custom_minimum_size = Vector2(
 		205,
-		100
+		120
 	)
 
 
@@ -816,6 +947,11 @@ func show_current_character() -> void:
 		)
 
 
+		var shine = (
+			upgrade_shines[i]
+		)
+
+
 		if i >= current_choices.size():
 
 			button.text = (
@@ -823,6 +959,13 @@ func show_current_character() -> void:
 			)
 
 			button.disabled = true
+
+			shine.visible = false
+
+			apply_upgrade_button_style(
+				button,
+				"Neutral"
+			)
 
 			continue
 
@@ -836,6 +979,27 @@ func show_current_character() -> void:
 			create_upgrade_text(
 				upgrade
 			)
+		)
+
+
+		var upgrade_type: String = (
+			str(
+				upgrade.get(
+					"type",
+					""
+				)
+			)
+		)
+
+
+		apply_upgrade_button_style(
+			button,
+			upgrade_type
+		)
+
+
+		shine.visible = (
+			upgrade_type == "Special"
 		)
 
 
@@ -856,6 +1020,191 @@ func show_current_character() -> void:
 	update_upgrade_ledger(
 		character
 	)
+
+
+# =========================================================
+# BUTTON STYLE
+# =========================================================
+
+func apply_upgrade_button_style(
+	button: Button,
+	upgrade_type: String
+) -> void:
+
+	var normal_color: Color = (
+		NEUTRAL_NORMAL_COLOR
+	)
+
+	var hover_color: Color = (
+		NEUTRAL_HOVER_COLOR
+	)
+
+	var pressed_color: Color = (
+		NEUTRAL_PRESSED_COLOR
+	)
+
+	var border_color: Color = (
+		NEUTRAL_BORDER_COLOR
+	)
+
+
+	if upgrade_type == "Special":
+
+		normal_color = (
+			SPECIAL_NORMAL_COLOR
+		)
+
+		hover_color = (
+			SPECIAL_HOVER_COLOR
+		)
+
+		pressed_color = (
+			SPECIAL_PRESSED_COLOR
+		)
+
+		border_color = (
+			SPECIAL_BORDER_COLOR
+		)
+
+
+	elif upgrade_type == "Class":
+
+		normal_color = (
+			CLASS_NORMAL_COLOR
+		)
+
+		hover_color = (
+			CLASS_HOVER_COLOR
+		)
+
+		pressed_color = (
+			CLASS_PRESSED_COLOR
+		)
+
+		border_color = (
+			CLASS_BORDER_COLOR
+		)
+
+
+	elif upgrade_type == "Item":
+
+		normal_color = (
+			ITEM_NORMAL_COLOR
+		)
+
+		hover_color = (
+			ITEM_HOVER_COLOR
+		)
+
+		pressed_color = (
+			ITEM_PRESSED_COLOR
+		)
+
+		border_color = (
+			ITEM_BORDER_COLOR
+		)
+
+
+	var normal_style = (
+		create_card_style(
+			normal_color,
+			border_color
+		)
+	)
+
+
+	var hover_style = (
+		create_card_style(
+			hover_color,
+			border_color
+		)
+	)
+
+
+	var pressed_style = (
+		create_card_style(
+			pressed_color,
+			border_color
+		)
+	)
+
+
+	var disabled_style = (
+		create_card_style(
+			normal_color.darkened(
+				0.35
+			),
+			border_color.darkened(
+				0.30
+			)
+		)
+	)
+
+
+	button.add_theme_stylebox_override(
+		"normal",
+		normal_style
+	)
+
+
+	button.add_theme_stylebox_override(
+		"hover",
+		hover_style
+	)
+
+
+	button.add_theme_stylebox_override(
+		"pressed",
+		pressed_style
+	)
+
+
+	button.add_theme_stylebox_override(
+		"disabled",
+		disabled_style
+	)
+
+
+# =========================================================
+# CREATE CARD STYLE
+# =========================================================
+
+func create_card_style(
+	background_color: Color,
+	border_color: Color
+) -> StyleBoxFlat:
+
+	var style = StyleBoxFlat.new()
+
+
+	style.bg_color = (
+		background_color
+	)
+
+
+	style.border_color = (
+		border_color
+	)
+
+
+	style.set_border_width_all(
+		2
+	)
+
+
+	style.corner_radius_top_left = 6
+	style.corner_radius_top_right = 6
+	style.corner_radius_bottom_left = 6
+	style.corner_radius_bottom_right = 6
+
+
+	style.content_margin_left = 8.0
+	style.content_margin_right = 8.0
+	style.content_margin_top = 6.0
+	style.content_margin_bottom = 6.0
+
+
+	return style
 
 
 # =========================================================
@@ -1571,7 +1920,7 @@ func update_upgrade_ledger(
 
 	ledger_ability_label.text = (
 		get_starting_ability_text(
-			character_name
+			character
 		)
 	)
 
@@ -1592,91 +1941,67 @@ func update_upgrade_ledger(
 # =========================================================
 
 func get_starting_ability_text(
-	character_name: String
+	character: CharacterData
 ) -> String:
 
-	if character_name == "Veyra":
+	if character == null:
 
 		return (
-			"Wax Guard\n"
-			+ "First hit -50%."
+			"No starting ability assigned."
 		)
 
 
-	if character_name == "Zekrin":
+	var ability_id: String = (
+		character.basic_ability_id
+	)
+
+
+	if ability_id == "":
 
 		return (
-			"Predator Sting\n"
-			+ "Bonus damage to new targets."
+			"No starting ability assigned."
 		)
 
 
-	if character_name == "Melora":
+	var ability: Dictionary = (
+		UpgradeDatabase.get_basic_ability(
+			ability_id
+		)
+	)
+
+
+	if ability.size() == 0:
 
 		return (
-			"Royal Nectar\n"
-			+ "Every 5th attack heals an ally."
+			"Unknown ability: "
+			+ ability_id
 		)
 
 
-	if character_name == "Tharos":
-
-		return (
-			"Frenzy Wings\n"
-			+ "Taking damage gives move speed."
+	var ability_name: String = (
+		str(
+			ability.get(
+				"name",
+				ability_id
+			)
 		)
+	)
 
 
-	if character_name == "Aurex":
-
-		return (
-			"Piercing Needle\n"
-			+ "Every 4th attack gains damage."
+	var ability_description: String = (
+		str(
+			ability.get(
+				"description",
+				""
+			)
 		)
-
-
-	if character_name == "Kaelor":
-
-		return (
-			"First Cut\n"
-			+ "Bonus damage to new targets."
-		)
-
-
-	if character_name == "Syrra":
-
-		return (
-			"Ambush Instinct\n"
-			+ "Starts with bonus move speed."
-		)
-
-
-	if character_name == "Droven":
-
-		return (
-			"Guarded Stance\n"
-			+ "First 3 hits deal less damage."
-		)
-
-
-	if character_name == "Nyxis":
-
-		return (
-			"Corrosive Shot\n"
-			+ "Every 5th attack gains damage."
-		)
-
-
-	if character_name == "Velkara":
-
-		return (
-			"Marked Prey\n"
-			+ "First target takes allied bonus damage."
-		)
+	)
 
 
 	return (
-		"Starting ability pending."
+		ability_name
+		+ "\n"
+		+ ability_description
 	)
 
 

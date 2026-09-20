@@ -6,11 +6,12 @@
 script = ExtResource("1_mla2h")
 character_name = "Scyrix"
 faction = "Scolyra"
-class_role = "Assassin"
+class_role = "Fighter"
+basic_ability_id = "blood_rush"
+special_ability_id = "blood_frenzy"
 max_health = 160
 damage = 15
 move_speed = 85.0
 attack_cooldown = 0.88
 basic_attack_style = "Fast Stinging blades"
-unique_ability = "Soldier Carapace"
 metadata/_custom_type_script = "uid://csfalalb5rkse"

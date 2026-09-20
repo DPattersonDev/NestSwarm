@@ -92,16 +92,7 @@ var full_roster: Array[CharacterData] = []
 # PLACEMENT GRID SETTINGS
 # =========================================================
 
-# Four battlefield lanes.
 const GRID_COLUMNS: int = 4
-
-# Five placement depths.
-#
-# Row 0 = BACK
-# Row 1
-# Row 2
-# Row 3
-# Row 4 = FRONT
 const GRID_ROWS: int = 5
 
 
@@ -114,17 +105,7 @@ const PLAYER_GRID_ORIGIN: Vector2 = Vector2(
 	150
 )
 
-
-# Player X positions:
-#
-# Row 0 = 100
-# Row 1 = 175
-# Row 2 = 250
-# Row 3 = 325
-# Row 4 = 400
 const PLAYER_DEPTH_SPACING: float = 75.0
-
-
 const PLAYER_LANE_SPACING: float = 100.0
 
 
@@ -137,22 +118,12 @@ const ENEMY_GRID_ORIGIN: Vector2 = Vector2(
 	150
 )
 
-
-# Enemy X positions:
-#
-# Row 0 = 980
-# Row 1 = 905
-# Row 2 = 830
-# Row 3 = 755
-# Row 4 = 680
 const ENEMY_DEPTH_SPACING: float = 75.0
-
-
 const ENEMY_LANE_SPACING: float = 100.0
 
 
 # =========================================================
-# FALLBACK PLAYER POSITIONS
+# FALLBACK POSITIONS
 # =========================================================
 
 var fallback_player_positions = [
@@ -162,10 +133,6 @@ var fallback_player_positions = [
 	Vector2(100, 450)
 ]
 
-
-# =========================================================
-# FALLBACK ENEMY POSITIONS
-# =========================================================
 
 var fallback_enemy_positions = [
 	Vector2(980, 150),
@@ -191,20 +158,13 @@ var score_label: Label
 
 var selected_battle_character: Node = null
 
-
 const CHARACTER_CLICK_RADIUS: float = 80.0
-
 
 var ledger_panel: PanelContainer
 var ledger_title_label: Label
 var ledger_stats_label: Label
 var ledger_effects_label: Label
 
-
-# Save the most recent ledger information.
-#
-# This allows the panel to remain readable
-# after a selected character is defeated.
 var last_ledger_title: String = ""
 var last_ledger_stats: String = ""
 var last_ledger_effects: String = ""
@@ -218,7 +178,6 @@ var selected_character_was_defeated: bool = false
 
 func _ready() -> void:
 
-	# Build the complete 30-character roster.
 	create_full_roster()
 
 
@@ -488,9 +447,7 @@ func select_character_at_mouse() -> void:
 
 	selected_character_was_defeated = false
 
-
 	ledger_panel.visible = true
-
 
 	update_battle_ledger()
 
@@ -842,6 +799,12 @@ func check_for_winner() -> void:
 		"Characters"
 	):
 
+		if not is_instance_valid(
+			character
+		):
+			continue
+
+
 		if not character.is_alive:
 			continue
 
@@ -877,6 +840,50 @@ func check_for_winner() -> void:
 
 
 # =========================================================
+# STOP ALL COMBAT PROCESSING
+# =========================================================
+#
+# This runs immediately when a round ends.
+#
+# It prevents:
+#
+# - attacks after the winner is decided
+# - poison ticks after the winner is decided
+# - bleed ticks after the winner is decided
+# - movement during the result screen
+#
+# This fixes the extra HP/DOT lines that were appearing
+# after ROUND WIN / MATCH WIN was already printed.
+# =========================================================
+
+func stop_all_combat_processing() -> void:
+
+	for character in get_tree().get_nodes_in_group(
+		"Characters"
+	):
+
+		if not is_instance_valid(
+			character
+		):
+			continue
+
+
+		# Stop movement.
+		character.velocity = Vector2.ZERO
+
+
+		# Remove any DOT effects that were waiting
+		# to activate after combat already ended.
+		character.active_dots.clear()
+
+
+		# Completely stop the character's combat loop.
+		character.set_physics_process(
+			false
+		)
+
+
+# =========================================================
 # END ROUND
 # =========================================================
 
@@ -888,7 +895,12 @@ func end_round(
 		return
 
 
+	# Lock the round immediately.
 	combat_over = true
+
+
+	# Stop all characters before anything else happens.
+	stop_all_combat_processing()
 
 
 	GameState.record_round_winner(
@@ -922,12 +934,20 @@ func end_round(
 	print("====================")
 
 
+	# =====================================================
+	# MATCH COMPLETE
+	# =====================================================
+
 	if GameState.is_match_over():
 
 		end_match()
 
 		return
 
+
+	# =====================================================
+	# ROUND COMPLETE
+	# =====================================================
 
 	winner_label.text = (
 		"TEAM "
@@ -949,20 +969,10 @@ func end_round(
 	# =====================================================
 	# START BETWEEN-ROUND DECISION PHASE
 	# =====================================================
-	#
-	# One shared 60-second timer now covers:
-	#
-	# - Replacement decision
-	# - Replacement character selection
-	# - Replacement catch-up upgrades
-	# - Normal upgrades for the rest of the team
-	#
-	# Placement happens AFTER this timer ends or
-	# after all upgrade decisions are completed.
+
 	GameState.start_between_round_phase()
 
 
-	# Replacement happens BEFORE normal upgrades.
 	get_tree().change_scene_to_file(
 		"res://Scene/ReplacementSelect.tscn"
 	)
@@ -1124,9 +1134,11 @@ func create_battle_ledger() -> void:
 
 	var ledger_container = VBoxContainer.new()
 
+
 	ledger_container.mouse_filter = (
 		Control.MOUSE_FILTER_IGNORE
 	)
+
 
 	ledger_panel.add_child(
 		ledger_container
@@ -1287,6 +1299,13 @@ func update_battle_ledger() -> void:
 	)
 
 
+	if not character.is_alive:
+
+		title_text += (
+			" - DEFEATED"
+		)
+
+
 	ledger_title_label.text = (
 		title_text
 	)
@@ -1299,8 +1318,8 @@ func update_battle_ledger() -> void:
 	var current_damage: int = (
 		character.damage
 		+ character.fighter_momentum_bonus
-		+ character.blood_frenzy_bonus
 		+ character.united_colony_damage_bonus
+		+ character.get_temporary_damage_bonus()
 	)
 
 
@@ -1418,6 +1437,38 @@ func get_live_effect_text(
 	var faction_name: String = (
 		character.character_data.faction
 	)
+
+
+	# =====================================================
+	# BASIC STARTING ABILITY
+	# =====================================================
+
+	var basic_id: String = (
+		character.character_data.basic_ability_id
+	)
+
+
+	if basic_id != "":
+
+		var basic_ability: Dictionary = (
+			UpgradeDatabase.get_basic_ability(
+				basic_id
+			)
+		)
+
+
+		if not basic_ability.is_empty():
+
+			if basic_ability.has(
+				"name"
+			):
+
+				lines.append(
+					"BASIC: "
+					+ str(
+						basic_ability["name"]
+					)
+				)
 
 
 	# =====================================================
@@ -1690,37 +1741,106 @@ func get_live_effect_text(
 
 
 	# =====================================================
-	# FRENZY WINGS
+	# GENERIC DAMAGE BUFFS
 	# =====================================================
 
-	if character.frenzy_wings_timer > 0:
+	if character.damage_buffs.size() > 0:
 
 		lines.append(
-			"Frenzy Wings: +"
-			+ str(
-				character.frenzy_wings_bonus
-			)
-			+ " Speed"
+			"Temporary Damage Buff Active"
 		)
 
 
 	# =====================================================
-	# BLOOD FRENZY
+	# GENERIC MOVE SPEED BUFFS
 	# =====================================================
 
-	if character.blood_frenzy_timer > 0:
+	if character.move_speed_buffs.size() > 0:
 
 		lines.append(
-			"Blood Frenzy: +"
-			+ str(
-				character.blood_frenzy_bonus
-			)
-			+ " ATK"
+			"Movement Speed Buff Active"
 		)
 
 
 	# =====================================================
-	# UNITED COLONY LIVE BONUS
+	# GENERIC ATTACK SPEED BUFFS
+	# =====================================================
+
+	if character.attack_speed_buffs.size() > 0:
+
+		lines.append(
+			"Attack Speed Buff Active"
+		)
+
+
+	# =====================================================
+	# DAMAGE REDUCTION BUFFS
+	# =====================================================
+
+	if character.damage_reduction_buffs.size() > 0:
+
+		lines.append(
+			"Damage Reduction Active"
+		)
+
+
+	# =====================================================
+	# MOVEMENT SLOW
+	# =====================================================
+
+	if character.move_slow_effects.size() > 0:
+
+		lines.append(
+			"Movement Slow Active"
+		)
+
+
+	# =====================================================
+	# ATTACK SPEED SLOW
+	# =====================================================
+
+	if character.attack_slow_effects.size() > 0:
+
+		lines.append(
+			"Attack Speed Slow Active"
+		)
+
+
+	# =====================================================
+	# DAMAGE OVER TIME
+	# =====================================================
+
+	if character.active_dots.size() > 0:
+
+		lines.append(
+			"Damage Over Time Active"
+		)
+
+
+	# =====================================================
+	# CORRODED
+	# =====================================================
+
+	if character.corrosion_timer > 0:
+
+		lines.append(
+			"Corroded"
+		)
+
+
+	# =====================================================
+	# MARKED
+	# =====================================================
+
+	if character.marked_timer > 0:
+
+		lines.append(
+			"Marked"
+		)
+
+
+	# =====================================================
+	# UNITED COLONY
 	# =====================================================
 
 	if character.united_colony_damage_bonus > 0:
@@ -1731,32 +1851,6 @@ func get_live_effect_text(
 				character.united_colony_damage_bonus
 			)
 			+ " ATK"
-		)
-
-
-	# =====================================================
-	# TEMPORARY ATTACK SPEED
-	# =====================================================
-
-	if character.temporary_attack_speed_timer > 0:
-
-		lines.append(
-			"Temporary Attack Speed Buff"
-		)
-
-
-	# =====================================================
-	# MARKED PREY
-	# =====================================================
-
-	if character.marked_timer > 0:
-
-		lines.append(
-			"Marked Prey: +"
-			+ str(
-				character.marked_bonus_damage
-			)
-			+ " incoming allied damage"
 		)
 
 

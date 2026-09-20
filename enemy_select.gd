@@ -5,17 +5,21 @@ extends Control
 # DEV ENEMY SELECT
 # =========================================================
 #
-# This screen is used for development/testing.
+# Development-only enemy selection screen.
 #
-# It allows us to choose the exact four characters
-# that the opponent will use during the match.
+# Layout:
 #
-# The selected opponent team is saved into:
+#                 Vanguard   Fighter   Assassin   Marksman   Support
 #
-# GameState.enemy_team
+# Vesper
+# Anttalope
+# Lepidra
+# Formicara
+# Caraphex
+# Scolyra
 #
-# Once selected, the same enemy team remains
-# for the entire match.
+# This keeps factions grouped together while also lining
+# up every class vertically for fast testing.
 # =========================================================
 
 
@@ -170,6 +174,29 @@ var thesira = preload(
 
 
 # =========================================================
+# DISPLAY ORDER
+# =========================================================
+
+const FACTION_ORDER: Array[String] = [
+	"Vesper",
+	"Anttalope",
+	"Lepidra",
+	"Formicara",
+	"Caraphex",
+	"Scolyra"
+]
+
+
+const CLASS_ORDER: Array[String] = [
+	"Vanguard",
+	"Fighter",
+	"Assassin",
+	"Marksman",
+	"Support"
+]
+
+
+# =========================================================
 # ROSTER
 # =========================================================
 
@@ -182,7 +209,9 @@ var full_roster: Array[CharacterData] = []
 
 var selected_enemies: Array[CharacterData] = []
 
-var enemy_buttons: Array[Button] = []
+# Stores:
+# CharacterData -> Button
+var button_by_character: Dictionary = {}
 
 
 # =========================================================
@@ -198,6 +227,17 @@ var start_button: Button
 # =========================================================
 
 func _ready() -> void:
+
+	create_roster()
+
+	create_enemy_select_ui()
+
+
+# =========================================================
+# CREATE FULL ROSTER
+# =========================================================
+
+func create_roster() -> void:
 
 	full_roster = [
 
@@ -245,9 +285,6 @@ func _ready() -> void:
 	]
 
 
-	create_enemy_select_ui()
-
-
 # =========================================================
 # CREATE UI
 # =========================================================
@@ -263,14 +300,14 @@ func create_enemy_select_ui() -> void:
 
 
 	main_container.position = Vector2(
-		70,
-		20
+		35,
+		15
 	)
 
 
 	main_container.size = Vector2(
-		1020,
-		620
+		1080,
+		625
 	)
 
 
@@ -293,7 +330,7 @@ func create_enemy_select_ui() -> void:
 
 	title.add_theme_font_size_override(
 		"font_size",
-		30
+		28
 	)
 
 
@@ -321,7 +358,7 @@ func create_enemy_select_ui() -> void:
 
 	description.add_theme_font_size_override(
 		"font_size",
-		16
+		15
 	)
 
 
@@ -331,7 +368,7 @@ func create_enemy_select_ui() -> void:
 
 
 	# =====================================================
-	# SELECTION COUNT
+	# SELECTED COUNT
 	# =====================================================
 
 	selection_label = Label.new()
@@ -349,13 +386,82 @@ func create_enemy_select_ui() -> void:
 
 	selection_label.add_theme_font_size_override(
 		"font_size",
-		20
+		18
 	)
 
 
 	main_container.add_child(
 		selection_label
 	)
+
+
+	# =====================================================
+	# CLASS HEADERS
+	# =====================================================
+
+	var header_row = HBoxContainer.new()
+
+
+	header_row.custom_minimum_size = Vector2(
+		1060,
+		42
+	)
+
+
+	main_container.add_child(
+		header_row
+	)
+
+
+	var blank_header = Label.new()
+
+
+	blank_header.custom_minimum_size = Vector2(
+		125,
+		42
+	)
+
+
+	header_row.add_child(
+		blank_header
+	)
+
+
+	for role_name in CLASS_ORDER:
+
+		var class_header = Label.new()
+
+
+		class_header.text = (
+			role_name.to_upper()
+		)
+
+
+		class_header.custom_minimum_size = Vector2(
+			184,
+			42
+		)
+
+
+		class_header.horizontal_alignment = (
+			HORIZONTAL_ALIGNMENT_CENTER
+		)
+
+
+		class_header.vertical_alignment = (
+			VERTICAL_ALIGNMENT_CENTER
+		)
+
+
+		class_header.add_theme_font_size_override(
+			"font_size",
+			13
+		)
+
+
+		header_row.add_child(
+			class_header
+		)
 
 
 	# =====================================================
@@ -366,8 +472,8 @@ func create_enemy_select_ui() -> void:
 
 
 	scroll_container.custom_minimum_size = Vector2(
-		1020,
-		430
+		1060,
+		420
 	)
 
 
@@ -382,75 +488,32 @@ func create_enemy_select_ui() -> void:
 
 
 	# =====================================================
-	# CHARACTER GRID
+	# FACTION ROW CONTAINER
 	# =====================================================
 
-	var enemy_grid = GridContainer.new()
+	var faction_container = VBoxContainer.new()
 
 
-	enemy_grid.columns = 5
-
-
-	enemy_grid.custom_minimum_size = Vector2(
-		1000,
+	faction_container.custom_minimum_size = Vector2(
+		1040,
 		0
 	)
 
 
 	scroll_container.add_child(
-		enemy_grid
+		faction_container
 	)
 
 
 	# =====================================================
-	# CHARACTER BUTTONS
+	# CREATE EACH FACTION ROW
 	# =====================================================
 
-	for i in range(
-		full_roster.size()
-	):
+	for faction_name in FACTION_ORDER:
 
-		var character: CharacterData = (
-			full_roster[i]
-		)
-
-
-		var button = Button.new()
-
-
-		button.custom_minimum_size = Vector2(
-			195,
-			100
-		)
-
-
-		button.text = (
-			create_enemy_card_text(
-				character
-			)
-		)
-
-
-		button.add_theme_font_size_override(
-			"font_size",
-			13
-		)
-
-
-		button.pressed.connect(
-			_on_enemy_button_pressed.bind(
-				i
-			)
-		)
-
-
-		enemy_grid.add_child(
-			button
-		)
-
-
-		enemy_buttons.append(
-			button
+		create_faction_row(
+			faction_container,
+			faction_name
 		)
 
 
@@ -468,7 +531,7 @@ func create_enemy_select_ui() -> void:
 
 	start_button.custom_minimum_size = Vector2(
 		300,
-		55
+		52
 	)
 
 
@@ -486,6 +549,198 @@ func create_enemy_select_ui() -> void:
 
 
 # =========================================================
+# CREATE FACTION ROW
+# =========================================================
+
+func create_faction_row(
+	parent: VBoxContainer,
+	faction_name: String
+) -> void:
+
+	var row = HBoxContainer.new()
+
+
+	row.custom_minimum_size = Vector2(
+		1040,
+		82
+	)
+
+
+	parent.add_child(
+		row
+	)
+
+
+	# =====================================================
+	# FACTION LABEL
+	# =====================================================
+
+	var faction_label = Label.new()
+
+
+	faction_label.text = (
+		faction_name.to_upper()
+	)
+
+
+	faction_label.custom_minimum_size = Vector2(
+		125,
+		80
+	)
+
+
+	faction_label.horizontal_alignment = (
+		HORIZONTAL_ALIGNMENT_CENTER
+	)
+
+
+	faction_label.vertical_alignment = (
+		VERTICAL_ALIGNMENT_CENTER
+	)
+
+
+	faction_label.add_theme_font_size_override(
+		"font_size",
+		13
+	)
+
+
+	row.add_child(
+		faction_label
+	)
+
+
+	# =====================================================
+	# ONE CHARACTER PER CLASS
+	# =====================================================
+
+	for role_name in CLASS_ORDER:
+
+		var character: CharacterData = (
+			find_character(
+				faction_name,
+				role_name
+			)
+		)
+
+
+		if character == null:
+
+			var missing = Label.new()
+
+
+			missing.text = (
+				"MISSING"
+			)
+
+
+			missing.custom_minimum_size = Vector2(
+				184,
+				80
+			)
+
+
+			missing.horizontal_alignment = (
+				HORIZONTAL_ALIGNMENT_CENTER
+			)
+
+
+			missing.vertical_alignment = (
+				VERTICAL_ALIGNMENT_CENTER
+			)
+
+
+			row.add_child(
+				missing
+			)
+
+
+			continue
+
+
+		var button: Button = (
+			create_character_button(
+				character
+			)
+		)
+
+
+		row.add_child(
+			button
+		)
+
+
+# =========================================================
+# FIND CHARACTER BY FACTION + CLASS
+# =========================================================
+
+func find_character(
+	faction_name: String,
+	role_name: String
+) -> CharacterData:
+
+	for character in full_roster:
+
+		if character.faction != faction_name:
+			continue
+
+
+		if character.class_role != role_name:
+			continue
+
+
+		return character
+
+
+	return null
+
+
+# =========================================================
+# CREATE CHARACTER BUTTON
+# =========================================================
+
+func create_character_button(
+	character: CharacterData
+) -> Button:
+
+	var button = Button.new()
+
+
+	button.custom_minimum_size = Vector2(
+		184,
+		80
+	)
+
+
+	button.text = (
+		create_enemy_card_text(
+			character
+		)
+	)
+
+
+	button.add_theme_font_size_override(
+		"font_size",
+		13
+	)
+
+
+	button.pressed.connect(
+		_on_enemy_button_pressed.bind(
+			character
+		)
+	)
+
+
+	button_by_character[
+		character
+	] = button
+
+
+	return button
+
+
+# =========================================================
 # CHARACTER CARD TEXT
 # =========================================================
 
@@ -496,8 +751,6 @@ func create_enemy_card_text(
 	return (
 		character.character_name
 		+ "\n"
-		+ character.faction
-		+ "\n"
 		+ character.class_role
 	)
 
@@ -507,27 +760,12 @@ func create_enemy_card_text(
 # =========================================================
 
 func _on_enemy_button_pressed(
-	index: int
+	character: CharacterData
 ) -> void:
 
-	if index < 0:
+	if character == null:
 		return
 
-
-	if index >= full_roster.size():
-		return
-
-
-	var character: CharacterData = (
-		full_roster[
-			index
-		]
-	)
-
-
-	# =====================================================
-	# REMOVE CHARACTER
-	# =====================================================
 
 	if selected_enemies.has(
 		character
@@ -537,10 +775,6 @@ func _on_enemy_button_pressed(
 			character
 		)
 
-
-	# =====================================================
-	# ADD CHARACTER
-	# =====================================================
 
 	elif selected_enemies.size() < 4:
 
@@ -567,17 +801,12 @@ func update_enemy_select_ui() -> void:
 	)
 
 
-	for i in range(
-		enemy_buttons.size()
-	):
+	for character in button_by_character.keys():
 
 		var button: Button = (
-			enemy_buttons[i]
-		)
-
-
-		var character: CharacterData = (
-			full_roster[i]
+			button_by_character[
+				character
+			]
 		)
 
 
@@ -587,9 +816,7 @@ func update_enemy_select_ui() -> void:
 
 			button.text = (
 				"SELECTED\n"
-				+ create_enemy_card_text(
-					character
-				)
+				+ character.character_name
 			)
 
 

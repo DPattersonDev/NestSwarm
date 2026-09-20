@@ -6,12 +6,13 @@
 script = ExtResource("1_wl3ta")
 character_name = "Nyzara"
 faction = "Scolyra"
-class_role = "Fighter"
+class_role = "Assassin"
+basic_ability_id = "flashstep"
+special_ability_id = "venom_flash"
 max_health = 105
 damage = 19
 move_speed = 105.0
 attack_range = 55.0
 attack_cooldown = 0.8
 basic_attack_style = "Fast Stinging blades"
-unique_ability = "Soldier Carapace"
 metadata/_custom_type_script = "uid://csfalalb5rkse"

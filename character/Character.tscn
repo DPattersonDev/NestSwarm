@@ -6,6 +6,42 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1xu5b"]
 size = Vector2(60, 60)
 
+[sub_resource type="Animation" id="Animation_r2475"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("BattleSprite:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_d211m"]
+resource_name = "idle"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("BattleSprite:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.5, 1),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(0, 0), Vector2(0, -2), Vector2(0, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_mfnnf"]
+_data = {
+&"RESET": SubResource("Animation_r2475"),
+&"idle": SubResource("Animation_d211m")
+}
+
 [node name="CharacterBody2D" type="CharacterBody2D" unique_id=137325416 groups=["Characters"]]
 collision_mask = 0
 script = ExtResource("1_dpp5g")
@@ -27,3 +63,4 @@ position = Vector2(1, 76)
 shape = SubResource("RectangleShape2D_1xu5b")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=803022400]
+libraries/ = SubResource("AnimationLibrary_mfnnf")
