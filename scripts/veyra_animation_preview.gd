@@ -17,7 +17,7 @@ func _ready() -> void:
 	layer.add_child(panel)
 	var title: Label = Label.new()
 	var first_data: CharacterData = load("res://Data/" + preview_roster[0] + ".tres")
-	title.text = first_data.faction.to_upper() + " — Animation preview"
+	title.text = "ALL CHARACTERS — Animation preview" if preview_roster.size() > 5 else first_data.faction.to_upper() + " — Animation preview"
 	title.add_theme_font_size_override("font_size", 26)
 	panel.add_child(title)
 	status = Label.new()
