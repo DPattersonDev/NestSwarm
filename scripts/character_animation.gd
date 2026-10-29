@@ -7,6 +7,10 @@ extends Node
 @onready var pivot: Node2D = character.get_node("VisualPivot")
 @onready var sprite: Sprite2D = pivot.get_node("BattleSprite")
 
+var frame_sprite: Sprite2D
+var pose_time: float = 0.0
+var current_pose: StringName = &"idle"
+
 var enabled: bool = false
 var action: StringName = &""
 var facing: float = 1.0
@@ -19,11 +23,23 @@ func setup() -> void:
 		and sprite.texture != null
 	)
 	if enabled:
+		var atlas_path: String = "res://Art/Animations/" + character.character_data.character_name + ".png"
+		if ResourceLoader.exists(atlas_path):
+			frame_sprite = Sprite2D.new()
+			frame_sprite.texture = load(atlas_path)
+			frame_sprite.hframes = 4
+			frame_sprite.vframes = 2
+			var factor: float = 70.0 / (float(frame_sprite.texture.get_height()) / 2.0)
+			frame_sprite.scale = Vector2(factor, factor)
+			frame_sprite.visible = false
+			pivot.add_child(frame_sprite)
 		player.animation_finished.connect(_on_animation_finished)
 		play_pose(&"idle")
 
 # Read actual movement without changing targeting, damage, or attack timers.
 func _process(_delta: float) -> void:
+	pose_time += _delta
+	_update_frame_pose()
 
 	if not enabled or not character.is_alive or action != &"":
 		return
@@ -48,12 +64,15 @@ func play_pose(animation: StringName, restart: bool = false) -> void:
 
 	if not restart and player.current_animation == animation and player.is_playing():
 		return
+	current_pose = animation
+	pose_time = 0.0
 	player.stop()
 	sprite.position = Vector2.ZERO
 	sprite.rotation = 0.0
 	sprite.modulate = Color.WHITE
 	player.play(animation)
 	player.advance(0.0)
+	_update_frame_pose()
 
 func attack() -> void:
 
@@ -88,3 +107,15 @@ func _on_animation_finished(animation: StringName) -> void:
 	elif animation == action:
 		action = &""
 		play_pose(&"idle")
+
+# Two prototype atlases: real alternating legs and weapon poses, not a rotated card.
+func _update_frame_pose() -> void:
+	if not is_instance_valid(frame_sprite):
+		return
+	var use_frames: bool = current_pose in [&"walk", &"attack"]
+	frame_sprite.visible = use_frames
+	sprite.visible = not use_frames
+	if current_pose == &"walk":
+		frame_sprite.frame = int(pose_time / 0.15) % 4
+	elif current_pose == &"attack":
+		frame_sprite.frame = 4 + mini(3, int(pose_time / 0.055))

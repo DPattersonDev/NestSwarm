@@ -178,6 +178,8 @@ var selected_character_was_defeated: bool = false
 
 func _ready() -> void:
 
+	add_child(preload("res://scripts/arena_board.gd").new())
+
 	create_full_roster()
 
 
@@ -618,69 +620,11 @@ func spawn_enemy_team(
 # PLAYER GRID TO WORLD
 # =========================================================
 
-func player_grid_to_world_position(
-	grid_position: Vector2i
-) -> Vector2:
+func player_grid_to_world_position(grid_position: Vector2i) -> Vector2:
+	return preload("res://scripts/board_layout.gd").cell_center(grid_position)
 
-	var world_x: float = (
-		PLAYER_GRID_ORIGIN.x
-		+ (
-			grid_position.y
-			* PLAYER_DEPTH_SPACING
-		)
-	)
-
-
-	var world_y: float = (
-		PLAYER_GRID_ORIGIN.y
-		+ (
-			grid_position.x
-			* PLAYER_LANE_SPACING
-		)
-	)
-
-
-	return Vector2(
-		world_x,
-		world_y
-	)
-
-
-# =========================================================
-# OPPONENT GRID TO WORLD
-# =========================================================
-
-func enemy_grid_to_world_position(
-	grid_position: Vector2i
-) -> Vector2:
-
-	var world_x: float = (
-		ENEMY_GRID_ORIGIN.x
-		- (
-			grid_position.y
-			* ENEMY_DEPTH_SPACING
-		)
-	)
-
-
-	var world_y: float = (
-		ENEMY_GRID_ORIGIN.y
-		+ (
-			grid_position.x
-			* ENEMY_LANE_SPACING
-		)
-	)
-
-
-	return Vector2(
-		world_x,
-		world_y
-	)
-
-
-# =========================================================
-# RANDOM OPPONENT PLACEMENT
-# =========================================================
+func enemy_grid_to_world_position(grid_position: Vector2i) -> Vector2:
+	return preload("res://scripts/board_layout.gd").cell_center(grid_position, true)
 
 func create_random_enemy_placement(
 	enemy_team: Array
