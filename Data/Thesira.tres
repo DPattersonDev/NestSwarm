@@ -2,9 +2,13 @@
 
 [ext_resource type="Script" uid="uid://csfalalb5rkse" path="res://scripts/character_data.gd" id="1_twjk5"]
 
+[ext_resource type="Texture2D" path="res://Art/Characters/Scolyra/Thesira.png" id="2_art"]
+
 [resource]
 script = ExtResource("1_twjk5")
 character_name = "Thesira"
+battle_texture = ExtResource("2_art")
+sprite_animations_enabled = true
 faction = "Scolyra"
 class_role = "Support"
 basic_ability_id = "adrenal_venom"
