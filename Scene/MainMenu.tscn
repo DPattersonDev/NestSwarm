@@ -1,8 +1,8 @@
-[gd_scene format=3 uid="uid://ckjvke5himr75"]
+[gd_scene load_steps=2 format=3 uid="uid://ckjvke5himr75"]
 
 [ext_resource type="Script" uid="uid://i6rkm50idn12" path="res://scripts/main_menu.gd" id="1_rrxvj"]
 
-[node name="MainMenu" type="Control" unique_id=1155177263]
+[node name="MainMenu" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -11,7 +11,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_rrxvj")
 
-[node name="MenuContainer" type="VBoxContainer" parent="." unique_id=1165020613]
+[node name="MenuContainer" type="VBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -25,16 +25,16 @@ offset_bottom = 35.5
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="NESTSWARM" type="Label" parent="MenuContainer" unique_id=786602847]
+[node name="NESTSWARM" type="Label" parent="MenuContainer"]
 layout_mode = 2
 
-[node name="PlayButton" type="Button" parent="MenuContainer" unique_id=223496057]
+[node name="PlayButton" type="Button" parent="MenuContainer"]
 layout_mode = 2
 
-[node name="CharacterButton" type="Button" parent="MenuContainer" unique_id=501158477]
+[node name="CharacterButton" type="Button" parent="MenuContainer"]
 layout_mode = 2
 
-[node name="SettingsButton" type="Button" parent="MenuContainer" unique_id=1651054409]
+[node name="SettingsButton" type="Button" parent="MenuContainer"]
 layout_mode = 2
 
 [connection signal="pressed" from="MenuContainer/PlayButton" to="." method="_on_play_button_pressed"]
