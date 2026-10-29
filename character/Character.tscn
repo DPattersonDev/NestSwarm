@@ -3,6 +3,8 @@
 [ext_resource type="Script" uid="uid://ohn3hmyp3vf2" path="res://scripts/character.gd" id="1_dpp5g"]
 [ext_resource type="Texture2D" uid="uid://kqt8kv4qpu7s" path="res://character/Veyra/Veyra.png.png" id="2_r2475"]
 
+[ext_resource type="Script" path="res://scripts/character_animation.gd" id="3_animation"]
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1xu5b"]
 size = Vector2(60, 60)
 
@@ -11,7 +13,7 @@ length = 0.001
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("BattleSprite:position")
+tracks/0/path = NodePath("VisualPivot/BattleSprite:position")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -23,10 +25,11 @@ tracks/0/keys = {
 
 [sub_resource type="Animation" id="Animation_d211m"]
 resource_name = "idle"
+loop_mode = 1
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("BattleSprite:position")
+tracks/0/path = NodePath("VisualPivot/BattleSprite:position")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -36,10 +39,175 @@ tracks/0/keys = {
 "values": [Vector2(0, 0), Vector2(0, -2), Vector2(0, 0)]
 }
 
+[sub_resource type="Animation" id="Animation_walk"]
+resource_name = "walk"
+length = 0.6
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("VisualPivot/BattleSprite:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.15, 0.3, 0.45, 0.6),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector2(0, 0), Vector2(0, -3), Vector2(0, 0), Vector2(0, -3), Vector2(0, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("VisualPivot/BattleSprite:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.15, 0.3, 0.45, 0.6),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 0,
+"values": [0, -0.025, 0, 0.025, 0]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("VisualPivot/BattleSprite:modulate")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.15, 0.3, 0.45, 0.6),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_attack"]
+resource_name = "attack"
+length = 0.22
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("VisualPivot/BattleSprite:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.055, 0.12, 0.22),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Vector2(8, -1), Vector2(12, -2), Vector2(5, -1), Vector2(0, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("VisualPivot/BattleSprite:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.055, 0.12, 0.22),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [0.09, 0.12, 0.04, 0]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("VisualPivot/BattleSprite:modulate")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.055, 0.12, 0.22),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_hit"]
+resource_name = "hit"
+length = 0.16
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("VisualPivot/BattleSprite:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.06, 0.16),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(-3, 0), Vector2(-2, 0), Vector2(0, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("VisualPivot/BattleSprite:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.06, 0.16),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [-0.045, -0.02, 0]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("VisualPivot/BattleSprite:modulate")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.06, 0.16),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Color(1, 0.45, 0.3, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_death"]
+resource_name = "death"
+length = 0.55
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("VisualPivot/BattleSprite:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.2, 0.55),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(0, 0), Vector2(0, 5), Vector2(0, 12)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("VisualPivot/BattleSprite:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.2, 0.55),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [0, 0.2, 0.6]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("VisualPivot/BattleSprite:modulate")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.2, 0.55),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(0.7, 0.7, 0.7, 0.75), Color(0.5, 0.5, 0.5, 0)]
+}
+
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_mfnnf"]
 _data = {
 &"RESET": SubResource("Animation_r2475"),
-&"idle": SubResource("Animation_d211m")
+&"idle": SubResource("Animation_d211m"),
+&"walk": SubResource("Animation_walk"),
+&"attack": SubResource("Animation_attack"),
+&"hit": SubResource("Animation_hit"),
+&"death": SubResource("Animation_death")
 }
 
 [node name="CharacterBody2D" type="CharacterBody2D" unique_id=137325416 groups=["Characters"]]
@@ -54,7 +222,9 @@ offset_right = 30.0
 offset_bottom = 30.0
 color = Color(0.085144766, 0.31097454, 0.8638736, 1)
 
-[node name="BattleSprite" type="Sprite2D" parent="." unique_id=1904770714]
+[node name="VisualPivot" type="Node2D" parent="."]
+
+[node name="BattleSprite" type="Sprite2D" parent="VisualPivot" unique_id=1904770714]
 z_index = 1
 texture = ExtResource("2_r2475")
 
@@ -63,4 +233,9 @@ position = Vector2(1, 76)
 shape = SubResource("RectangleShape2D_1xu5b")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=803022400]
-libraries/ = SubResource("AnimationLibrary_mfnnf")
+libraries = {
+&"": SubResource("AnimationLibrary_mfnnf")
+}
+
+[node name="CharacterAnimation" type="Node" parent="."]
+script = ExtResource("3_animation")
