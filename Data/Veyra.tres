@@ -6,6 +6,7 @@
 [resource]
 script = ExtResource("1_21fro")
 character_name = "Veyra"
+sprite_animations_enabled = true
 battle_texture = ExtResource("1_beceg")
 faction = "Vesper"
 class_role = "Vanguard"

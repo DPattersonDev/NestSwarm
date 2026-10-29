@@ -30,7 +30,8 @@ extends CharacterBody2D
 # =========================================================
 
 @onready var placeholder_visual: ColorRect = $ColorRect
-@onready var battle_sprite: Sprite2D = $BattleSprite
+@onready var battle_sprite: Sprite2D = $VisualPivot/BattleSprite
+@onready var character_animation: Node = $CharacterAnimation
 
 # =========================================================
 # GLOBAL COMBAT LIMITS
@@ -357,6 +358,7 @@ func _ready() -> void:
 		name = character_data.character_name
 
 	setup_battle_visual()
+	character_animation.setup()
 
 	if team_id == 1:
 
@@ -421,10 +423,9 @@ func setup_battle_visual() -> void:
 		battle_sprite.visible = true
 		placeholder_visual.visible = false
 
-		battle_sprite.scale = Vector2(
-			0.05,
-			0.05
-		)
+		# Keep imported artwork at the same approximate battlefield height.
+		var sprite_scale: float = 70.0 / float(battle_sprite.texture.get_height())
+		battle_sprite.scale = Vector2(sprite_scale, sprite_scale)
 
 	else:
 
@@ -1409,6 +1410,9 @@ func attack_target() -> void:
 
 	if not target.is_alive:
 		return
+
+	# Trigger the visual on the existing damage event.
+	character_animation.attack()
 
 	var attacked_target = target
 
@@ -4314,6 +4318,10 @@ func take_damage(
 	# HEALTH DAMAGE
 	# =====================================================
 
+	# Zero damage and fully absorbed hits do not cause a health hit reaction.
+	if final_damage > 0:
+		character_animation.hit()
+
 	current_health -= (
 		final_damage
 	)
@@ -6864,4 +6872,6 @@ func die() -> void:
 
 		trigger_united_colony_death_bonus()
 
-	queue_free()
+	# Combat death is immediate; animated art remains for its death clip.
+	if not character_animation.death():
+		queue_free()

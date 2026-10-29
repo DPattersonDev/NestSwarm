@@ -2,9 +2,13 @@
 
 [ext_resource type="Script" uid="uid://csfalalb5rkse" path="res://scripts/character_data.gd" id="1_b60l5"]
 
+[ext_resource type="Texture2D" path="res://Art/Characters/Vesper/Aurex.png" id="2_art"]
+
 [resource]
 script = ExtResource("1_b60l5")
 character_name = "Aurex"
+battle_texture = ExtResource("2_art")
+sprite_animations_enabled = true
 faction = "Vesper"
 class_role = "Marksman"
 basic_ability_id = "needle_line"

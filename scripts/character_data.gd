@@ -20,6 +20,9 @@ class_name CharacterData
 # using the current placeholder visual.
 @export var battle_texture: Texture2D
 
+# Opt in after the character artwork has been prepared for the shared clips.
+@export var sprite_animations_enabled: bool = false
+
 
 # =========================================================
 # SYNERGY TRAITS
