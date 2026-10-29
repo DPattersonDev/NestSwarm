@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/veyra_animation_preview.gd" id="1"]
+
+[node name="AllCharactersAnimationPreview" type="Node2D"]
+script = ExtResource("1")
+preview_roster = PackedStringArray("Aurelia", "Aurex", "Brontis", "Droven", "Ignivar", "Kaelor", "Karnyx", "Kharvos", "Lunara", "Mavros", "Melora", "Mordrax", "Myraxa", "Noctren", "Nyxis", "Nyzara", "Raxen", "Scyrix", "Solvyr", "Syrra", "Tarsik", "Tharos", "Thesira", "Velkara", "Veltrix", "Vexira", "Veyra", "Virex", "Vorren", "Zekrin")
