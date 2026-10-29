@@ -1,5 +1,7 @@
 extends CharacterBody2D
 
+const CombatFX = preload("res://scripts/combat_fx.gd")
+
 # =========================================================
 # DEBUG SETTINGS
 # =========================================================
@@ -1580,6 +1582,35 @@ func attack_target() -> void:
 			+ " px)."
 		)
 
+	# =====================================================
+	# NYZARA - FLASHSTEP RECOVERY
+	# =====================================================
+
+	attack_timer = (
+		get_current_attack_cooldown()
+	)
+
+	if flag_used(
+		"flashstep_recovery"
+	):
+
+		attack_timer *= 0.80
+
+		ability_flags.erase(
+			"flashstep_recovery"
+		)
+
+
+	# Anticipation, then a short visible shot; health changes at arrival.
+	await get_tree().create_timer(0.07).timeout
+	if not is_alive or not is_physics_processing() or not is_instance_valid(attacked_target) or not attacked_target.is_alive:
+		return
+	if character_data.class_role in ["Marksman", "Support"]:
+		await CombatFX.projectile(self, attacked_target)
+	else:
+		CombatFX.melee(self, attacked_target)
+	if not is_alive or not is_physics_processing() or not is_instance_valid(attacked_target) or not attacked_target.is_alive:
+		return
 	attacked_target.take_damage(
 		final_damage,
 		self,
@@ -1615,23 +1646,6 @@ func attack_target() -> void:
 			attacked_target
 		)
 
-	# =====================================================
-	# NYZARA - FLASHSTEP RECOVERY
-	# =====================================================
-
-	attack_timer = (
-		get_current_attack_cooldown()
-	)
-
-	if flag_used(
-		"flashstep_recovery"
-	):
-
-		attack_timer *= 0.80
-
-		ability_flags.erase(
-			"flashstep_recovery"
-		)
 
 # =========================================================
 # BASIC ATTACK DAMAGE ABILITIES
@@ -3955,6 +3969,9 @@ func apply_dot(
 	ticks: int,
 	interval: float
 ) -> void:
+	if is_alive:
+		CombatFX.burst(self, "bleed" if "bleed" in key else "poison")
+
 
 	active_dots[key] = {
 		"damage": tick_damage,
@@ -4320,6 +4337,7 @@ func take_damage(
 
 	# Zero damage and fully absorbed hits do not cause a health hit reaction.
 	if final_damage > 0:
+		CombatFX.burst(self, "hit")
 		character_animation.hit()
 
 	current_health -= (
@@ -5077,6 +5095,8 @@ func receive_shield(
 	if not is_alive:
 		return
 
+	if amount > 0:
+		CombatFX.burst(self, "shield", amount)
 	current_shield += amount
 
 	shield_timer = max(
@@ -6520,6 +6540,9 @@ func heal(
 	if not is_alive:
 		return
 
+	var restored: int = min(amount, max_health - current_health)
+	if restored > 0:
+		CombatFX.burst(self, "heal", restored)
 	current_health += amount
 
 	current_health = min(
