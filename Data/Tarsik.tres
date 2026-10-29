@@ -2,9 +2,13 @@
 
 [ext_resource type="Script" uid="uid://csfalalb5rkse" path="res://scripts/character_data.gd" id="1_soheq"]
 
+[ext_resource type="Texture2D" path="res://Art/Characters/Formicara/Tarsik.png" id="2_art"]
+
 [resource]
 script = ExtResource("1_soheq")
 character_name = "Tarsik"
+battle_texture = ExtResource("2_art")
+sprite_animations_enabled = true
 faction = "Formicara"
 class_role = "Marksman"
 basic_ability_id = "coordinated_fire"
