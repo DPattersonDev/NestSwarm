@@ -106,7 +106,11 @@ var ledger_upgrades: Label
 
 func _ready() -> void:
 
+	RenderingServer.set_default_clear_color(Color("171e2b"))
+
 	if GameState.selected_team.size() != 4:
+
+		placement_timer_active = false
 
 		print(
 			"Placement Error: Player does not have 4 characters."
@@ -175,414 +179,91 @@ func _process(
 # =========================================================
 
 func create_placement_ui() -> void:
-
-	# =====================================================
-	# LEFT SIDE - PLACEMENT
-	# =====================================================
-
-	var main_container = VBoxContainer.new()
-
-	add_child(
-		main_container
+	var backdrop := TextureRect.new()
+	backdrop.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	backdrop.texture = preload("res://Art/Arenas/Vesper/vesper_arena_placeholder.png")
+	backdrop.position = Vector2(9, 165)
+	backdrop.size = Vector2(745, 334)
+	backdrop.modulate = Color(0.65, 0.65, 0.65)
+	backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(backdrop)
+	_ui_label("ROUND %d  •  PLACE YOUR TEAM" % GameState.current_round, Vector2(24, 12), 25)
+	_ui_label("Choose a character below, then click a square. Your team faces RIGHT.", Vector2(24, 49), 16)
+	placement_timer_label = _ui_label("", Vector2(24, 82), 16)
+	var pause := Button.new()
+	pause.position = Vector2(245, 78)
+	pause.size = Vector2(140, 32)
+	pause.text = "Pause timer"
+	pause.pressed.connect(func():
+		placement_timer_active = not placement_timer_active
+		pause.text = "Resume timer" if not placement_timer_active else "Pause timer"
 	)
-
-
-	# Move the entire placement UI closer
-	# to the top of the screen.
-	main_container.position = Vector2(
-		30,
-		5
-	)
-
-
-	main_container.size = Vector2(
-		740,
-		625
-	)
-
-
-	# =========================
-	# TITLE
-	# =========================
-
-	var title = Label.new()
-
-	title.text = (
-		"ROUND "
-		+ str(GameState.current_round)
-		+ " - PLACE YOUR TEAM"
-	)
-
-	title.horizontal_alignment = (
-		HORIZONTAL_ALIGNMENT_CENTER
-	)
-
-	title.add_theme_font_size_override(
-		"font_size",
-		25
-	)
-
-	main_container.add_child(
-		title
-	)
-
-
-	# =========================
-	# SCORE
-	# =========================
-
-	var score_label = Label.new()
-
-	score_label.text = (
-		"SCORE: "
-		+ str(GameState.player_round_wins)
-		+ " - "
-		+ str(GameState.enemy_round_wins)
-	)
-
-	score_label.horizontal_alignment = (
-		HORIZONTAL_ALIGNMENT_CENTER
-	)
-
-	score_label.add_theme_font_size_override(
-		"font_size",
-		17
-	)
-
-	main_container.add_child(
-		score_label
-	)
-
-
-	# =========================
-	# PLACEMENT TIMER
-	# =========================
-
-	placement_timer_label = Label.new()
-
-	placement_timer_label.text = (
-		"PLACEMENT TIME: 15s"
-	)
-
-	placement_timer_label.horizontal_alignment = (
-		HORIZONTAL_ALIGNMENT_CENTER
-	)
-
-	placement_timer_label.add_theme_font_size_override(
-		"font_size",
-		18
-	)
-
-	main_container.add_child(
-		placement_timer_label
-	)
-
-
-	# =========================
-	# SELECTED CHARACTER
-	# =========================
-
-	selected_label = Label.new()
-
-	selected_label.text = (
-		"Select a character"
-	)
-
-	selected_label.horizontal_alignment = (
-		HORIZONTAL_ALIGNMENT_CENTER
-	)
-
-	selected_label.add_theme_font_size_override(
-		"font_size",
-		16
-	)
-
-	main_container.add_child(
-		selected_label
-	)
-
-
-	# =========================
-	# ACTIVE TRAITS
-	# =========================
-
-	trait_bar_label = Label.new()
-
-	trait_bar_label.text = (
-		"ACTIVE TRAITS: None"
-	)
-
-	trait_bar_label.custom_minimum_size = Vector2(
-		720,
-		26
-	)
-
-	trait_bar_label.horizontal_alignment = (
-		HORIZONTAL_ALIGNMENT_CENTER
-	)
-
-	trait_bar_label.vertical_alignment = (
-		VERTICAL_ALIGNMENT_CENTER
-	)
-
-	trait_bar_label.add_theme_font_size_override(
-		"font_size",
-		14
-	)
-
-	main_container.add_child(
-		trait_bar_label
-	)
-
-
-	# =========================
-	# FRONT LABEL
-	# =========================
-
-	var front_label = Label.new()
-
-	front_label.text = (
-		"FRONT"
-	)
-
-	front_label.horizontal_alignment = (
-		HORIZONTAL_ALIGNMENT_CENTER
-	)
-
-	front_label.add_theme_font_size_override(
-		"font_size",
-		13
-	)
-
-	main_container.add_child(
-		front_label
-	)
-
-
-	# =====================================================
-	# PLACEMENT GRID
-	# =====================================================
-
-	var grid = GridContainer.new()
-
-	grid.columns = GRID_COLUMNS
-
-	main_container.add_child(
-		grid
-	)
-
-
-	# =====================================================
-	# FLIPPED DISPLAY ORDER
-	# =====================================================
-
-	for display_row in range(
-		GRID_ROWS
-	):
-
-		var logical_row: int = (
-			GRID_ROWS
-			- 1
-			- display_row
-		)
-
-
-		for column in range(
-			GRID_COLUMNS
-		):
-
-			var cell_position = Vector2i(
-				column,
-				logical_row
-			)
-
-
-			var grid_button = Button.new()
-
-
-			# Reduced height so all five rows
-			# fit comfortably on-screen.
-			grid_button.custom_minimum_size = Vector2(
-				175,
-				48
-			)
-
-
-			grid_button.text = (
-				"EMPTY"
-			)
-
-
-			grid_button.pressed.connect(
-				_on_grid_button_pressed.bind(
-					cell_position
-				)
-			)
-
-
-			grid.add_child(
-				grid_button
-			)
-
-
-			grid_buttons[
-				cell_position
-			] = grid_button
-
-
-	# =========================
-	# BACK LABEL
-	# =========================
-
-	var back_label = Label.new()
-
-	back_label.text = (
-		"BACK"
-	)
-
-	back_label.horizontal_alignment = (
-		HORIZONTAL_ALIGNMENT_CENTER
-	)
-
-	back_label.add_theme_font_size_override(
-		"font_size",
-		13
-	)
-
-	main_container.add_child(
-		back_label
-	)
-
-
-	# =========================
-	# PLACEMENT COUNT
-	# =========================
-
-	placement_count_label = Label.new()
-
-	placement_count_label.text = (
-		"Placed: 0 / 4"
-	)
-
-	placement_count_label.horizontal_alignment = (
-		HORIZONTAL_ALIGNMENT_CENTER
-	)
-
-	placement_count_label.add_theme_font_size_override(
-		"font_size",
-		15
-	)
-
-	main_container.add_child(
-		placement_count_label
-	)
-
-
-	# =========================
-	# CHARACTER BENCH
-	# =========================
-
-	var bench_title = Label.new()
-
-	bench_title.text = (
-		"YOUR TEAM"
-	)
-
-	bench_title.horizontal_alignment = (
-		HORIZONTAL_ALIGNMENT_CENTER
-	)
-
-	bench_title.add_theme_font_size_override(
-		"font_size",
-		16
-	)
-
-	main_container.add_child(
-		bench_title
-	)
-
-
-	var bench_container = HBoxContainer.new()
-
-	main_container.add_child(
-		bench_container
-	)
-
-
-	for character in GameState.selected_team:
-
-		var character_button = Button.new()
-
-
-		# Slightly shorter to save vertical space.
-		character_button.custom_minimum_size = Vector2(
-			175,
-			48
-		)
-
-
-		character_button.text = (
-			character.character_name
-			+ "\n"
-			+ character.class_role
-		)
-
-
-		character_button.pressed.connect(
-			_on_character_button_pressed.bind(
-				character
-			)
-		)
-
-
-		bench_container.add_child(
-			character_button
-		)
-
-
-		character_buttons[
-			character.character_name
-		] = character_button
-
-
-	# =========================
-	# START ROUND BUTTON
-	# =========================
-
+	add_child(pause)
+	selected_label = _ui_label("Select a character from your team", Vector2(24, 113), 16)
+	var board := Control.new()
+	board.position = Vector2(9, 127)
+	board.scale = Vector2(0.69, 0.69)
+	add_child(board)
+	var arena := preload("res://scripts/arena_board.gd").new()
+	arena.placement = true
+	board.add_child(arena)
+	var layout = preload("res://scripts/board_layout.gd")
+	for lane in range(GRID_COLUMNS):
+		for depth in range(GRID_ROWS):
+			var cell := Vector2i(lane, depth)
+			var button := Button.new()
+			button.position = layout.cell_rect(cell).position
+			button.size = layout.TILE_SIZE
+			button.tooltip_text = "Lane %d • Depth %d (%s)" % [lane + 1, depth + 1, "front" if depth == 4 else "back" if depth == 0 else "middle"]
+			button.pressed.connect(_on_grid_button_pressed.bind(cell))
+			board.add_child(button)
+			grid_buttons[cell] = button
+			var art := TextureRect.new()
+			art.name = "CharacterArt"
+			art.position = Vector2(4, 0)
+			art.size = Vector2(62, 56)
+			art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			art.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			button.add_child(art)
+			var name_label := Label.new()
+			name_label.name = "Name"
+			name_label.position = Vector2(0, 54)
+			name_label.size = Vector2(70, 16)
+			name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			name_label.add_theme_font_size_override("font_size", 11)
+			name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			button.add_child(name_label)
+
+	placement_count_label = _ui_label("", Vector2(24, 525), 16)
+	for index in range(GameState.selected_team.size()):
+		var data: CharacterData = GameState.selected_team[index]
+		var button := Button.new()
+		button.position = Vector2(24 + index * 184, 555)
+		button.size = Vector2(176, 70)
+		button.icon = data.battle_texture
+		button.expand_icon = true
+		button.add_theme_constant_override("icon_max_width", 40)
+		button.add_theme_font_size_override("font_size", 13)
+		button.pressed.connect(_on_character_button_pressed.bind(data))
+		add_child(button)
+		character_buttons[data.character_name] = button
 	start_round_button = Button.new()
-
-	start_round_button.text = (
-		"START ROUND"
-	)
-
-	start_round_button.custom_minimum_size = Vector2(
-		250,
-		38
-	)
-
-	start_round_button.disabled = true
-
-
-	start_round_button.pressed.connect(
-		_on_start_round_pressed
-	)
-
-
-	main_container.add_child(
-		start_round_button
-	)
-
-
-	# =====================================================
-	# RIGHT SIDE - CHARACTER LEDGER
-	# =====================================================
-
+	start_round_button.position = Vector2(480, 632)
+	start_round_button.size = Vector2(270, 40)
+	start_round_button.text = "START ROUND →"
+	start_round_button.pressed.connect(_on_start_round_pressed)
+	add_child(start_round_button)
+	trait_bar_label = _ui_label("", Vector2(24, 680), 13)
 	create_character_ledger()
 
-
-# =========================================================
-# CREATE CHARACTER LEDGER
-# =========================================================
+func _ui_label(text: String, at: Vector2, font_size: int) -> Label:
+	var label := Label.new()
+	label.text = text
+	label.position = at
+	label.add_theme_font_size_override("font_size", font_size)
+	add_child(label)
+	return label
 
 func create_character_ledger() -> void:
 
@@ -1931,109 +1612,34 @@ func load_saved_placement() -> void:
 # =========================================================
 
 func update_placement_ui() -> void:
-
 	update_trait_bar()
-
-
-	for cell_position in grid_buttons.keys():
-
-		var button = (
-			grid_buttons[
-				cell_position
-			]
-		)
-
-
-		if occupied_cells.has(
-			cell_position
-		):
-
-			var character = (
-				occupied_cells[
-					cell_position
-				]
-			)
-
-
-			button.text = (
-				character.character_name
-				+ "\n"
-				+ character.class_role
-			)
-
-
-		else:
-
-			button.text = (
-				"EMPTY"
-			)
-
-
-	for character in GameState.selected_team:
-
-		var button = (
-			character_buttons[
-				character.character_name
-			]
-		)
-
-
-		var character_position = (
-			find_character_position(
-				character
-			)
-		)
-
-
-		if character_position != Vector2i(
-			-1,
-			-1
-		):
-
-			button.text = (
-				character.character_name
-				+ "\nPLACED"
-			)
-
-
-		else:
-
-			button.text = (
-				character.character_name
-				+ "\n"
-				+ character.class_role
-			)
-
-
-	if selected_character != null:
-
-		selected_label.text = (
-			"Placing: "
-			+ selected_character.character_name
-		)
-
-
-	var placed_count = (
-		occupied_cells.size()
-	)
-
-
-	placement_count_label.text = (
-		"Placed: "
-		+ str(placed_count)
-		+ " / 4"
-	)
-
-
-	start_round_button.disabled = (
-		placed_count != 4
-		or round_starting
-	)
-
-
-# =========================================================
-# PLACEMENT TIMER DISPLAY
-# =========================================================
+	for cell in grid_buttons:
+		var button: Button = grid_buttons[cell]
+		var data: CharacterData = occupied_cells.get(cell)
+		button.text = ""
+		button.get_node("CharacterArt").texture = data.battle_texture if data != null else null
+		button.get_node("Name").text = data.character_name if data != null else "+" if selected_character != null else ""
+		var fill := Color(0.08, 0.2, 0.23, 0.68)
+		var edge := Color("467a79")
+		if data != null:
+			fill = Color(0.12, 0.35, 0.36, 0.85)
+		if selected_character != null:
+			edge = Color("f4d58a") if data == selected_character else Color("80e7c9") if data == null else edge
+		var style = preload("res://scripts/arena_board.gd")._panel(fill, edge)
+		button.add_theme_stylebox_override("normal", style)
+		var hover = style.duplicate()
+		hover.border_color = Color("ffe1a1")
+		hover.set_border_width_all(3)
+		button.add_theme_stylebox_override("hover", hover)
+		button.add_theme_stylebox_override("focus", hover)
+	for data in GameState.selected_team:
+		var button: Button = character_buttons[data.character_name]
+		var placed: bool = find_character_position(data) != Vector2i(-1, -1)
+		button.text = data.character_name + "\n" + ("PLACED" if placed else data.class_role)
+		button.modulate = Color("ffe1a1") if data == selected_character else Color.WHITE
+	selected_label.text = "Choose a square for " + selected_character.character_name if selected_character != null else "Click a placed character to move it, or choose one below."
+	placement_count_label.text = "Placed: %d / 4  •  Same positions when combat begins" % occupied_cells.size()
+	start_round_button.disabled = occupied_cells.size() != 4 or round_starting
 
 func update_placement_timer_display() -> void:
 

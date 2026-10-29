@@ -48,13 +48,18 @@ func run() -> void:
 	check(anim.action == "attack", "Basic attack must trigger animation")
 	check(anim.pivot.scale.x == -1, "Attack must face a target on the left")
 	check(sprite.position.x > 0, "Thrust must apply a local forward offset")
-	check(enemy.current_health < enemy.max_health, "Attack must still damage enemy")
+	check(enemy.current_health == enemy.max_health, "Damage must wait for weapon release")
+	unit.set_physics_process(true)
+	await create_timer(0.09).timeout
+	unit.set_physics_process(false)
+	check(enemy.current_health < enemy.max_health, "Attack must damage enemy at release")
 	anim.hit()
 	check(anim.action == "attack", "Hit must not cancel a visible attack")
 	player.advance(0.3)
 	await process_frame
 	check(anim.action == &"", "Attack must unlock when finished")
 	check(player.current_animation == "idle", "Attack must return to idle")
+	unit.current_shield = 0
 	unit.take_damage(1)
 	check(anim.action == "hit", "Health damage must trigger hit")
 	player.advance(0.2)
