@@ -2,9 +2,13 @@
 
 [ext_resource type="Script" uid="uid://csfalalb5rkse" path="res://scripts/character_data.gd" id="1_wxvg7"]
 
+[ext_resource type="Texture2D" path="res://Art/Characters/Anttalope/Kaelor.png" id="2_art"]
+
 [resource]
 script = ExtResource("1_wxvg7")
 character_name = "Kaelor"
+battle_texture = ExtResource("2_art")
+sprite_animations_enabled = true
 faction = "Anttalope"
 class_role = "Fighter"
 basic_ability_id = "horn_charge"
