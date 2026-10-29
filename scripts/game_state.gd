@@ -33,6 +33,24 @@ var player_placements: Dictionary = {}
 
 var enemy_placements: Dictionary = {}
 
+# Snapshot only the formation that was revealed when a battle started.
+var last_enemy_formation: Dictionary = {}
+var last_enemy_art: Dictionary = {}
+var last_enemy_formation_round: int = 0
+
+func remember_enemy_formation() -> void:
+	last_enemy_formation = enemy_placements.duplicate(true)
+	last_enemy_art.clear()
+	for data in enemy_team:
+		last_enemy_art[data.character_name] = data.battle_texture
+	last_enemy_formation_round = current_round
+
+func get_visible_enemy_history() -> Dictionary:
+	if last_enemy_formation_round <= 0 or last_enemy_formation_round >= current_round:
+		return {}
+	return {"round": last_enemy_formation_round, "cells": last_enemy_formation.duplicate(true), "art": last_enemy_art.duplicate()}
+
+
 
 # =========================================================
 # ROUND / MATCH STATE
@@ -225,6 +243,10 @@ func record_replacement(
 # =========================================================
 
 func reset_match() -> void:
+
+	last_enemy_formation.clear()
+	last_enemy_art.clear()
+	last_enemy_formation_round = 0
 
 	selected_team.clear()
 

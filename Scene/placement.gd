@@ -182,8 +182,8 @@ func create_placement_ui() -> void:
 	var backdrop := TextureRect.new()
 	backdrop.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	backdrop.texture = preload("res://Art/Arenas/Vesper/vesper_arena_placeholder.png")
-	backdrop.position = Vector2(9, 165)
-	backdrop.size = Vector2(745, 334)
+	backdrop.position = Vector2(16, 132)
+	backdrop.size = Vector2(500, 460)
 	backdrop.modulate = Color(0.65, 0.65, 0.65)
 	backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(backdrop)
@@ -201,12 +201,20 @@ func create_placement_ui() -> void:
 	add_child(pause)
 	selected_label = _ui_label("Select a character from your team", Vector2(24, 113), 16)
 	var board := Control.new()
-	board.position = Vector2(9, 127)
-	board.scale = Vector2(0.69, 0.69)
+	board.position = Vector2(16, 54)
+	board.scale = Vector2(1.02, 1.02)
 	add_child(board)
 	var arena := preload("res://scripts/arena_board.gd").new()
 	arena.placement = true
 	board.add_child(arena)
+	var mini = preload("res://scripts/formation_history.gd").new()
+	mini.position = Vector2(745, 170)
+	mini.size = Vector2(220, 215)
+	mini.snapshot = GameState.get_visible_enemy_history()
+	add_child(mini)
+	_ui_label("Your next move", Vector2(565, 430), 22)
+	_ui_label("Choose a teammate, then a square.\nThe enemy's current positions stay hidden.\nPrevious formation is only a reference.", Vector2(565, 470), 16)
+
 	var layout = preload("res://scripts/board_layout.gd")
 	for lane in range(GRID_COLUMNS):
 		for depth in range(GRID_ROWS):
@@ -235,11 +243,11 @@ func create_placement_ui() -> void:
 			name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			button.add_child(name_label)
 
-	placement_count_label = _ui_label("", Vector2(24, 525), 16)
+	placement_count_label = _ui_label("", Vector2(24, 614), 16)
 	for index in range(GameState.selected_team.size()):
 		var data: CharacterData = GameState.selected_team[index]
 		var button := Button.new()
-		button.position = Vector2(24 + index * 184, 555)
+		button.position = Vector2(24 + index * 184, 644)
 		button.size = Vector2(176, 70)
 		button.icon = data.battle_texture
 		button.expand_icon = true
@@ -249,13 +257,21 @@ func create_placement_ui() -> void:
 		add_child(button)
 		character_buttons[data.character_name] = button
 	start_round_button = Button.new()
-	start_round_button.position = Vector2(480, 632)
+	start_round_button.position = Vector2(790, 654)
 	start_round_button.size = Vector2(270, 40)
 	start_round_button.text = "START ROUND →"
 	start_round_button.pressed.connect(_on_start_round_pressed)
 	add_child(start_round_button)
-	trait_bar_label = _ui_label("", Vector2(24, 680), 13)
+	trait_bar_label = _ui_label("", Vector2(24, 724), 13)
 	create_character_ledger()
+	var details := Button.new()
+	details.position = Vector2(880, 78)
+	details.size = Vector2(180, 34)
+	details.text = "Character details"
+	details.pressed.connect(func():
+		get_node("CharacterLedger").visible = not get_node("CharacterLedger").visible
+	)
+	add_child(details)
 
 func _ui_label(text: String, at: Vector2, font_size: int) -> Label:
 	var label := Label.new()
@@ -272,6 +288,8 @@ func create_character_ledger() -> void:
 	# =====================================================
 
 	var ledger_panel = PanelContainer.new()
+	ledger_panel.name = "CharacterLedger"
+	ledger_panel.visible = false
 
 	add_child(
 		ledger_panel
@@ -280,7 +298,7 @@ func create_character_ledger() -> void:
 
 	ledger_panel.position = Vector2(
 		790,
-		30
+		120
 	)
 
 	ledger_panel.size = Vector2(

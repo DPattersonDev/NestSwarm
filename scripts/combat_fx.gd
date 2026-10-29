@@ -17,7 +17,7 @@ static func burst(unit: Node2D, effect: String, amount: int = 0) -> void:
 	fx.position = unit.position
 	fx.tint = Color("7df4b0") if effect == "heal" else Color("8ee1ff") if effect == "shield" else Color("ec7a7a") if effect == "bleed" else Color("b0e950") if effect == "poison" else Color("ffe0a0")
 	fx.lifetime = 0.65 if effect in ["heal", "shield", "poison", "bleed"] else 0.22
-	fx.caption = "+%d" % amount if effect == "heal" else ""
+	fx.caption = "+%d HP" % amount if effect == "heal" else ""
 	unit.get_parent().add_child(fx)
 
 static func projectile(source: Node2D, victim: Node2D) -> void:
@@ -84,7 +84,7 @@ func _draw() -> void:
 				var at := Vector2((i - 1) * 15, -10 - t * 30 - i * 4)
 				draw_line(at - Vector2(4, 0), at + Vector2(4, 0), tint, 2.5)
 				draw_line(at - Vector2(0, 4), at + Vector2(0, 4), tint, 2.5)
-			draw_string(ThemeDB.fallback_font, Vector2(-9, -28 - 20 * t), caption, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, tint)
+			draw_string(ThemeDB.fallback_font, Vector2(-22, -38 - 20 * t), caption, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, tint)
 		"shield":
 			draw_arc(Vector2.ZERO, 32 + 6 * t, 0, TAU, 40, tint, 2, true)
 		"poison", "bleed":

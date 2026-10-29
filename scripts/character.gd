@@ -347,6 +347,10 @@ func combat_time() -> float:
 
 func _ready() -> void:
 
+	var bubble = preload("res://scripts/shield_visual.gd").new()
+	bubble.name = "ShieldBubble"
+	add_child(bubble)
+
 	spawn_position = global_position
 
 	if character_data != null:
