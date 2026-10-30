@@ -18,9 +18,9 @@ func run() -> void:
 	root.add_child(placement)
 	placement.placement_timer_active = false
 	await process_frame
-	check(placement.grid_buttons.size() == 20, "Need twenty clickable squares")
+	check(placement.grid_buttons.size() == 28, "Need twenty-eight clickable squares")
 	for i in range(4):
-		var cell := Vector2i(i, 4 if i < 2 else 0)
+		var cell := Vector2i(i, 3 if i < 2 else 0)
 		placement._on_character_button_pressed(state.selected_team[i])
 		placement._on_grid_button_pressed(cell)
 		check(state.player_placements[state.selected_team[i].character_name] == cell, "Placement not saved")
@@ -28,17 +28,28 @@ func run() -> void:
 		check(placement.grid_buttons[cell].get_node("CharacterArt").texture != null, "Placed art missing")
 	check(not placement.start_round_button.disabled, "Four units must enable start")
 	placement._on_character_button_pressed(state.selected_team[0])
-	placement._on_grid_button_pressed(Vector2i(1, 4))
-	check(state.player_placements[state.selected_team[0].character_name] == Vector2i(0, 4), "Occupied cell overwrote another character")
-	placement._on_grid_button_pressed(Vector2i(0, 3))
-	check(not placement.occupied_cells.has(Vector2i(0, 4)), "Old square not cleared")
+	placement._on_grid_button_pressed(Vector2i(1, 3))
+	check(state.player_placements[state.selected_team[0].character_name] == Vector2i(0, 3), "Occupied cell overwrote another character")
+	placement._on_grid_button_pressed(Vector2i(0, 2))
+	check(not placement.occupied_cells.has(Vector2i(0, 3)), "Old square not cleared")
 	check(placement.occupied_cells.size() == 4, "Move duplicated unit")
 	var game_script = load("res://game.gd").new()
-	for lane in range(4):
-		for depth in range(5):
+	for lane in range(7):
+		for depth in range(4):
 			var cell := Vector2i(lane, depth)
 			check(game_script.player_grid_to_world_position(cell) == Layout.cell_center(cell), "Player combat mapping mismatch")
 			check(game_script.enemy_grid_to_world_position(cell) == Layout.cell_center(cell, true), "Enemy combat mapping mismatch")
+	# New orientation: front rows meet at the center, back rows face away.
+	check(Layout.cell_center(Vector2i(0, 0)).y > Layout.cell_center(Vector2i(0, 3)).y, "Player front must be above back")
+	check(Layout.cell_center(Vector2i(0, 0), true).y < Layout.cell_center(Vector2i(0, 3), true).y, "Enemy front must be below back")
+	for enemy in [false, true]:
+		for depth in range(Layout.DEPTH):
+			check(Layout.backline(Layout.cell_center(Vector2i(2, depth), enemy), enemy, 2) == (depth < 2), "Backline targeting uses wrong axis")
+	var arena = load("res://scripts/arena_board.gd").new()
+	root.add_child(arena)
+	for cell in placement.grid_buttons:
+		check(placement.grid_buttons[cell].global_position == Layout.cell_rect(cell).position, "Placement square moved away from combat tile")
+	arena.queue_free()
 	game_script.free()
 	placement.queue_free()
 	await process_frame

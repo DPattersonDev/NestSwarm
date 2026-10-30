@@ -6,8 +6,21 @@
 [node name="Game" type="Node2D" unique_id=1019461165]
 script = ExtResource("1_80nbo")
 
-[node name="AreanaBackground" type="Sprite2D" parent="." unique_id=1582840871]
-z_index = -10
-position = Vector2(493.5, 342.25)
-scale = Vector2(1.0113636, 1.0579171)
+[node name="HiveBackdrop" type="TextureRect" parent="."]
+z_index = -11
+modulate = Color(0.22, 0.22, 0.22, 1)
+offset_right = 1152.0
+offset_bottom = 760.0
 texture = ExtResource("2_e2o6t")
+expand_mode = 1
+mouse_filter = 2
+
+[node name="AreanaBackground" type="TextureRect" parent="."]
+z_index = -10
+offset_left = 160.0
+offset_top = 62.0
+offset_right = 716.0
+offset_bottom = 672.0
+texture = ExtResource("2_e2o6t")
+expand_mode = 1
+mouse_filter = 2

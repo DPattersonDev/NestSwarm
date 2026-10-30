@@ -5779,39 +5779,10 @@ func find_lowest_health_backline_enemy(
 
 	return lowest
 
-func is_backline_unit(
-	unit: CharacterBody2D,
-	rows: int
-) -> bool:
-
+func is_backline_unit(unit: CharacterBody2D, rows: int) -> bool:
 	if unit == null:
 		return false
-
-	if unit.team_id == 1:
-
-		if rows <= 2:
-
-			return (
-				unit.spawn_position.x
-				<= 175.0
-			)
-
-		return (
-			unit.spawn_position.x
-			<= 250.0
-		)
-
-	if rows <= 2:
-
-		return (
-			unit.spawn_position.x
-			>= 905.0
-		)
-
-	return (
-		unit.spawn_position.x
-		>= 830.0
-	)
+	return preload("res://scripts/board_layout.gd").backline(unit.spawn_position, unit.team_id != 1, rows)
 
 # =========================================================
 # FIND ALLIES / ENEMIES
