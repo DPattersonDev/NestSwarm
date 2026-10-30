@@ -1,37 +1,149 @@
 extends Node2D
 const Layout = preload("res://scripts/board_layout.gd")
-var placement: bool = false
 const FLOOR: Rect2 = Layout.FLOOR
+var placement := false
+# Both ends of a moving unit's step remain reserved until it arrives.
+var occupants: Dictionary = {}
+var units: Dictionary = {}
 func _ready() -> void:
+	name = "HexBattlefield"
 	z_index = 0 if placement else -5
 	set_physics_process(not placement)
-	queue_redraw()
-func _physics_process(_delta: float) -> void:
-	# Keep knockbacks and dashes on the playable floor, not the decorative walls.
-	var safe := FLOOR.grow(-32)
-	for unit in get_tree().get_nodes_in_group("Characters"):
-		if unit.get_parent() == get_parent() and unit.is_alive:
-			unit.position = unit.position.clamp(safe.position, safe.end)
 func _draw() -> void:
-	# Same tile floor in planning and combat; the hive illustration frames it.
-	draw_style_box(_panel(Color("241b13"), Color("cda453")), FLOOR.grow(18))
-	draw_style_box(_panel(Color("3a2a18"), Color("765431")), FLOOR.grow(7))
-	for enemy in [true, false]:
-		for column in range(Layout.LANES):
-			for depth in range(Layout.DEPTH):
-				var rect: Rect2 = Layout.cell_rect(Vector2i(column, depth), enemy)
-				var fill := Color("382c20") if enemy else Color("55402a")
-				var edge := Color("685236") if enemy else Color("b18b48")
-				if (column + depth) % 2 == 0:
-					fill = fill.lightened(0.035)
-				draw_style_box(_panel(fill, edge), rect)
-	# A central gold seam separates the two deployment halves.
-	draw_line(Vector2(202, 366), Vector2(674, 366), Color("f3cf78"), 3, true)
-	var font := ThemeDB.fallback_font
-	draw_string(font, Vector2(320, 92), "VESPER • HIVE ARENA", HORIZONTAL_ALIGNMENT_LEFT, -1, 17, Color("f3cf78"))
-	if placement:
-		draw_string(font, Vector2(344, 265), "ENEMY POSITIONS HIDDEN", HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color("c3ad88"))
-		draw_string(font, Vector2(378, 673), "YOUR TEAM  ↑", HORIZONTAL_ALIGNMENT_LEFT, -1, 17, Color("ffe1a1"))
+	# The artwork IS the battlefield. No opaque board covers the stone floor.
+	pass
+func _physics_process(_delta: float) -> void:
+	prune()
+func prune() -> void:
+	for id in units.keys():
+		var unit = units[id].ref.get_ref()
+		if not is_instance_valid(unit) or not unit.is_alive:
+			release(id)
+func release(id: int) -> void:
+	for cell in occupants.keys():
+		if occupants[cell] == id:
+			occupants.erase(cell)
+	units.erase(id)
+func register(unit) -> void:
+	var id: int = unit.get_instance_id()
+	if units.has(id):
+		return
+	var cell := Layout.nearest(unit.position)
+	if occupants.has(cell):
+		var best := INF
+		for candidate in Layout.global_cells():
+			var d: float = unit.position.distance_squared_to(Layout.center(candidate))
+			if not occupants.has(candidate) and d < best:
+				best = d
+				cell = candidate
+	occupants[cell] = id
+	units[id] = {"ref": weakref(unit), "cell": cell, "destination": Layout.INVALID}
+	unit.position = Layout.center(cell)
+func free_for(cell: Vector2i, id: int) -> bool:
+	return not occupants.has(cell) or occupants[cell] == id
+func in_range(unit, victim, position: Vector2, cell: Vector2i, distance: float) -> bool:
+	if position.distance_to(victim.position) <= distance:
+		return true
+	# Melee reaches an adjacent hex even when perspective widens a stone.
+	if unit.character_data.class_role not in ["Marksman", "Support"]:
+		var target_cell := Layout.nearest(victim.position)
+		return target_cell in Layout.neighbors(cell)
+	return false
+func route(unit, victim, distance: float) -> Array[Vector2i]:
+	var id: int = unit.get_instance_id()
+	var start: Vector2i = units[id].cell
+	var frontier: Array[Vector2i] = [start]
+	var previous := {start: Layout.INVALID}
+	var goal := Layout.INVALID
+	var closest := start
+	var closest_distance: float = Layout.center(start).distance_squared_to(victim.position)
+	while not frontier.is_empty():
+		var cell: Vector2i = frontier.pop_front()
+		if in_range(unit, victim, Layout.center(cell), cell, distance):
+			goal = cell
+			break
+		var d := Layout.center(cell).distance_squared_to(victim.position)
+		if d < closest_distance - 1:
+			closest_distance = d
+			closest = cell
+		for next in Layout.neighbors(cell):
+			if not previous.has(next) and free_for(next, id):
+				previous[next] = cell
+				frontier.append(next)
+	if goal == Layout.INVALID:
+		goal = closest
+	var result: Array[Vector2i] = [goal]
+	while goal != start:
+		goal = previous[goal]
+		result.push_front(goal)
+	return result
+# Returns true only when settled on a hex in attack range.
+func advance(unit, victim, distance: float, delta: float) -> bool:
+	prune()
+	register(unit)
+	var id: int = unit.get_instance_id()
+	var state: Dictionary = units[id]
+	if state.destination == Layout.INVALID:
+		if in_range(unit, victim, unit.position, state.cell, distance):
+			unit.velocity = Vector2.ZERO
+			return true
+		var path := route(unit, victim, distance)
+		if path.size() < 2:
+			unit.velocity = Vector2.ZERO
+			return false
+		state.destination = path[1]
+		occupants[path[1]] = id
+	var destination := Layout.center(state.destination)
+	var old: Vector2 = unit.position
+	unit.position = old.move_toward(destination, unit.get_current_move_speed() * delta)
+	unit.velocity = (unit.position - old) / maxf(delta, 0.00001)
+	if unit.position.is_equal_approx(destination):
+		occupants.erase(state.cell)
+		state.cell = state.destination
+		state.destination = Layout.INVALID
+		unit.velocity = Vector2.ZERO
+		return in_range(unit, victim, unit.position, state.cell, distance)
+	return false
+func can_attack(unit, victim, distance: float) -> bool:
+	register(unit)
+	var state: Dictionary = units[unit.get_instance_id()]
+	return state.destination == Layout.INVALID and in_range(unit, victim, unit.position, state.cell, distance)
+# Displacements must also finish on a free stone. Ordinary charges/knockbacks
+# stop at the first blocked hex; explicit blinks/leaps may cross units.
+func relocate(unit, desired: Vector2, teleport := false) -> void:
+	prune()
+	register(unit)
+	var id: int = unit.get_instance_id()
+	var state: Dictionary = units[id]
+	var start: Vector2i = state.cell
+	var chosen := start
+	var best := Layout.center(start).distance_squared_to(desired)
+	if teleport:
+		for cell in Layout.global_cells():
+			var d := Layout.center(cell).distance_squared_to(desired)
+			if free_for(cell, id) and d < best:
+				chosen = cell
+				best = d
+	else:
+		# Follow a chain of improving neighboring cells; never cross an occupant.
+		for _step in range(8):
+			var next_cell := chosen
+			for cell in Layout.neighbors(chosen):
+				var d := Layout.center(cell).distance_squared_to(desired)
+				if free_for(cell, id) and d < best - 1:
+					next_cell = cell
+					best = d
+			if next_cell == chosen:
+				break
+			chosen = next_cell
+	for cell in occupants.keys():
+		if occupants[cell] == id:
+			occupants.erase(cell)
+	occupants[chosen] = id
+	state.cell = chosen
+	state.destination = Layout.INVALID
+	unit.position = Layout.center(chosen)
+	unit.velocity = Vector2.ZERO
 static func _panel(fill: Color, edge: Color) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
 	style.bg_color = fill

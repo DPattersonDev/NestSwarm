@@ -10,14 +10,19 @@ func _draw() -> void:
 	var font := ThemeDB.fallback_font
 	draw_string(font, Vector2(14, 24), "Previous formation", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color("d7c4ad"))
 	draw_string(font, Vector2(14, 43), "Round %d • may change" % snapshot["round"] if not snapshot.is_empty() else "No previous round", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("999da6"))
-	for lane in range(7):
-		for depth in range(4):
-			var center := mini_center(Vector2i(lane, depth))
-			draw_rect(Rect2(center - Vector2(12, 12), Vector2(24, 24)), Color("35363a"))
-			draw_rect(Rect2(center - Vector2(12, 12), Vector2(24, 24)), Color("655b51"), false, 1)
+	var layout = preload("res://scripts/board_layout.gd")
+	for cell in layout.all_cells(true):
+		var center := mini_center(cell)
+		var points := PackedVector2Array()
+		for i in range(7):
+			points.append(center + Vector2(15, 0).rotated(i * TAU / 6 + PI / 6))
+		draw_colored_polygon(points, Color("35363a"))
+		draw_polyline(points, Color("8a7349"), 1, true)
 	if snapshot.is_empty():
 		return
 	for unit_name in snapshot["cells"]:
+		if not layout.is_valid(snapshot["cells"][unit_name], true):
+			continue
 		var texture: Texture2D = snapshot["art"].get(unit_name)
 		if texture == null:
 			continue
@@ -25,5 +30,5 @@ func _draw() -> void:
 		var center := mini_center(snapshot["cells"][unit_name])
 		draw_texture_rect(texture, Rect2(center - dimensions * 0.5, dimensions), false, Color(1, 1, 1, 0.75))
 func mini_center(cell: Vector2i) -> Vector2:
-	# Enemy front is at the bottom, matching the actual battlefield.
-	return Vector2(28 + cell.x * 27, 78 + cell.y * 30)
+	var row := cell.y
+	return Vector2(44 + cell.x * 34 + (17 if row % 2 else 0), 70 + row * 34)

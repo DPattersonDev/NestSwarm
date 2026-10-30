@@ -14,8 +14,11 @@ var current_pose: StringName = &"idle"
 var enabled: bool = false
 var action: StringName = &""
 var facing: float = 1.0
+var arena_scale: float = 1.0
 
 func setup() -> void:
+	arena_scale = 0.8 if character.hex_battlefield() != null else 1.0
+	pivot.scale = Vector2.ONE * arena_scale
 
 	enabled = (
 		character.character_data != null
@@ -56,7 +59,7 @@ func face_target() -> void:
 		if absf(offset) > 1.0:
 			facing = signf(offset)
 	# The sprite and its local lunge mirror together toward the opponent.
-	pivot.scale.x = facing
+	pivot.scale.x = facing * arena_scale
 
 # Reset every animated property when changing states to avoid leftover flashes
 # or a partially completed attack pose after an interruption.

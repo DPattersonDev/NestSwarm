@@ -349,6 +349,8 @@ func _ready() -> void:
 
 	var bubble = preload("res://scripts/shield_visual.gd").new()
 	bubble.name = "ShieldBubble"
+	if hex_battlefield() != null:
+		bubble.scale = Vector2(0.8, 0.8)
 	add_child(bubble)
 
 	spawn_position = global_position
@@ -1053,21 +1055,22 @@ func activate_combat_start_basic() -> void:
 					)
 				)
 
-				global_position += (
+				move_to_open_hex(global_position + (
 					direction
 					* charge_distance
-				)
+				))
 
-				target.take_damage(
-					3,
-					self,
-					false
-				)
+				if hex_battlefield() == null or hex_battlefield().can_attack(self, target, get_current_attack_range()):
+					target.take_damage(
+						3,
+						self,
+						false
+					)
 
-				target.apply_stagger(
-					0.5,
-					self
-				)
+					target.apply_stagger(
+						0.5,
+						self
+					)
 
 				debug_log(
 					str(name)
@@ -1198,6 +1201,9 @@ func _physics_process(
 		velocity = Vector2.ZERO
 		return
 
+	if not is_alive:
+		return
+
 	# =====================================================
 	# FORCED TARGET
 	# =====================================================
@@ -1261,46 +1267,41 @@ func _physics_process(
 		)
 	)
 
-	if distance_to_target > movement_stop_range:
-
-		reset_steady_aim_if_moving()
-
-		entrenched_stationary_timer = 0.0
-
-		var direction: Vector2 = (
-			global_position.direction_to(
-				target.global_position
-			)
-		)
-
-		velocity = (
-			direction
-			* get_current_move_speed()
-		)
-
-		move_and_slide()
-
-	else:
-
-		velocity = Vector2.ZERO
-
-		entrenched_stationary_timer += (
-			delta
-		)
-
-		# Recalculate after increasing the stationary timer.
-		# Entrenched Position can become active while the unit
-		# is holding at its setup distance.
-		current_range = (
-			get_current_attack_range()
-		)
-
-		if (
-			distance_to_target <= current_range
-			and attack_timer <= 0.0
-		):
-
+	var battlefield = hex_battlefield()
+	if battlefield != null:
+		var ready: bool = battlefield.advance(self, target, movement_stop_range, delta)
+		if not ready:
+			if velocity.length_squared() > 0.01:
+				reset_steady_aim_if_moving()
+				entrenched_stationary_timer = 0.0
+			return
+		entrenched_stationary_timer += delta
+		if attack_timer <= 0.0 and battlefield.can_attack(self, target, get_current_attack_range()):
 			attack_target()
+		return
+
+	# Preview scenes without a battlefield retain free movement.
+	if distance_to_target > movement_stop_range:
+		reset_steady_aim_if_moving()
+		entrenched_stationary_timer = 0.0
+		velocity = global_position.direction_to(target.global_position) * get_current_move_speed()
+		move_and_slide()
+	else:
+		velocity = Vector2.ZERO
+		entrenched_stationary_timer += delta
+		current_range = get_current_attack_range()
+		if distance_to_target <= current_range and attack_timer <= 0.0:
+			attack_target()
+
+func hex_battlefield():
+	return get_parent().get_node_or_null("HexBattlefield") if get_parent() != null else null
+
+func move_to_open_hex(desired: Vector2, teleport := false) -> void:
+	var battlefield = hex_battlefield()
+	if battlefield != null:
+		battlefield.relocate(self, desired, teleport)
+	else:
+		global_position = desired
 
 # =========================================================
 # TARGET SETTER
@@ -3029,7 +3030,8 @@ func handle_target_death(
 				* charge_distance
 			)
 
-			global_position = charge_end
+			move_to_open_hex(charge_end)
+			charge_end = global_position
 
 			for enemy in get_living_enemies():
 
@@ -5057,10 +5059,10 @@ func apply_knockback(
 		)
 	)
 
-	global_position += (
+	move_to_open_hex(global_position + (
 		direction
 		* distance
-	)
+	))
 
 # =========================================================
 # FORCE TARGET
@@ -6177,10 +6179,10 @@ func dash_toward_target(
 		)
 	)
 
-	global_position += (
+	move_to_open_hex(global_position + (
 		direction
 		* actual_distance
-	)
+	))
 
 func dash_away_from(
 	source: CharacterBody2D,
@@ -6196,10 +6198,10 @@ func dash_away_from(
 		)
 	)
 
-	global_position += (
+	move_to_open_hex(global_position + (
 		direction
 		* distance
-	)
+	))
 
 func jump_near_target(
 	jump_target: CharacterBody2D,
@@ -6219,11 +6221,11 @@ func jump_near_target(
 
 		direction = Vector2.LEFT
 
-	global_position = (
+	move_to_open_hex((
 		jump_target.global_position
 		+ direction
 		* distance_from_target
-	)
+	), true)
 
 func blink_behind_target(
 	blink_target: CharacterBody2D,
@@ -6239,11 +6241,11 @@ func blink_behind_target(
 		)
 	)
 
-	global_position = (
+	move_to_open_hex((
 		blink_target.global_position
 		+ direction
 		* distance
-	)
+	), true)
 
 func perform_sidestep(
 	step_target: CharacterBody2D,
@@ -6264,10 +6266,10 @@ func perform_sidestep(
 		toward_target.x
 	)
 
-	global_position += (
+	move_to_open_hex(global_position + (
 		perpendicular
 		* distance
-	)
+	))
 
 # =========================================================
 # MARKSMAN STEADY AIM
