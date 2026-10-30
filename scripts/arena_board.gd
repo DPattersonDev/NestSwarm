@@ -37,7 +37,7 @@ func register(unit) -> void:
 				best = d
 				cell = candidate
 	occupants[cell] = id
-	units[id] = {"ref": weakref(unit), "cell": cell, "destination": Layout.INVALID}
+	units[id] = {"ref": weakref(unit), "cell": cell, "destination": Layout.INVALID, "recent": [cell]}
 	unit.position = Layout.center(cell)
 func free_for(cell: Vector2i, id: int) -> bool:
 	return not occupants.has(cell) or occupants[cell] == id
@@ -54,11 +54,20 @@ func route(unit, victim, distance: float) -> Array[Vector2i]:
 	var start: Vector2i = units[id].cell
 	var frontier: Array[Vector2i] = [start]
 	var previous := {start: Layout.INVALID}
+	var cost := {start: 0.0}
+	var recent: Array = units[id].recent
 	var goal := Layout.INVALID
 	var closest := start
 	var closest_distance: float = Layout.center(start).distance_squared_to(victim.position)
 	while not frontier.is_empty():
-		var cell: Vector2i = frontier.pop_front()
+		# Dijkstra: a recently visited stone costs more than a fresh detour.
+		# Reversing is still legal when it is the only available route.
+		var best_index := 0
+		for i in range(1, frontier.size()):
+			if cost[frontier[i]] < cost[frontier[best_index]]:
+				best_index = i
+		var cell: Vector2i = frontier[best_index]
+		frontier.remove_at(best_index)
 		if in_range(unit, victim, Layout.center(cell), cell, distance):
 			goal = cell
 			break
@@ -67,9 +76,14 @@ func route(unit, victim, distance: float) -> Array[Vector2i]:
 			closest_distance = d
 			closest = cell
 		for next in Layout.neighbors(cell):
-			if not previous.has(next) and free_for(next, id):
+			if not free_for(next, id):
+				continue
+			var next_cost: float = cost[cell] + 1.0 + (4.0 if next in recent else 0.0)
+			if not cost.has(next) or next_cost < cost[next]:
+				cost[next] = next_cost
 				previous[next] = cell
-				frontier.append(next)
+				if not next in frontier:
+					frontier.append(next)
 	if goal == Layout.INVALID:
 		goal = closest
 	var result: Array[Vector2i] = [goal]
@@ -100,6 +114,9 @@ func advance(unit, victim, distance: float, delta: float) -> bool:
 	if unit.position.is_equal_approx(destination):
 		occupants.erase(state.cell)
 		state.cell = state.destination
+		state.recent.append(state.cell)
+		if state.recent.size() > 6:
+			state.recent.pop_front()
 		state.destination = Layout.INVALID
 		unit.velocity = Vector2.ZERO
 		return in_range(unit, victim, unit.position, state.cell, distance)
@@ -142,6 +159,7 @@ func relocate(unit, desired: Vector2, teleport := false) -> void:
 	occupants[chosen] = id
 	state.cell = chosen
 	state.destination = Layout.INVALID
+	state.recent = [chosen]
 	unit.position = Layout.center(chosen)
 	unit.velocity = Vector2.ZERO
 static func _panel(fill: Color, edge: Color) -> StyleBoxFlat:

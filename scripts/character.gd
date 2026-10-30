@@ -1204,49 +1204,13 @@ func _physics_process(
 	if not is_alive:
 		return
 
-	# =====================================================
-	# FORCED TARGET
-	# =====================================================
-
-	if (
-		forced_target != null
-		and combat_time() < forced_target_until
-		and is_instance_valid(forced_target)
-		and forced_target.is_alive
-	):
-
-		set_target(
-			forced_target
-		)
-
-	elif combat_time() >= forced_target_until:
-
+	# Ordinary targeting is refreshed continuously, including while a hex
+	# step is in progress. Only an active forced-target ability overrides it.
+	if is_instance_valid(forced_target) and forced_target.is_alive and combat_time() < forced_target_until:
+		set_target(forced_target)
+	else:
 		forced_target = null
-
-	# =====================================================
-	# TARGET VALIDATION
-	# =====================================================
-
-	if (
-		target == null
-		or not is_instance_valid(target)
-	):
-
-		set_target(
-			find_closest_enemy()
-		)
-
-	elif not target.is_alive:
-
-		var dead_target = target
-
-		handle_target_death(
-			dead_target
-		)
-
-		set_target(
-			find_closest_enemy()
-		)
+		set_target(find_closest_enemy())
 
 	if target == null:
 
@@ -5591,68 +5555,15 @@ func check_moonshot_progress() -> void:
 # =========================================================
 
 func find_closest_enemy() -> CharacterBody2D:
-
 	var best_enemy: CharacterBody2D = null
-
-	var best_score: float = INF
-
+	var best_distance := INF
 	for enemy in get_living_enemies():
-
 		if enemy.is_untargetable():
 			continue
-
-		var distance: float = (
-			global_position.distance_to(
-				enemy.global_position
-			)
-		)
-
-		var score: float = (
-			distance
-		)
-
-		# Marked Prey increases targeting priority.
-		if enemy.marked_for_team == team_id:
-
-			score *= 0.75
-
-		# Solvyr prefers isolated targets.
-		if (
-			get_basic_ability_id()
-			== "lunar_sight"
-			and is_target_isolated(
-				enemy
-			)
-		):
-
-			score -= 100.0
-
-		# Vexira prefers wounded targets.
-		if (
-			get_basic_ability_id()
-			== "weak_point"
-			and get_health_percent(
-				enemy
-			) < 0.50
-		):
-
-			score -= 100.0
-
-		# Virex prefers shielded targets.
-		if (
-			get_basic_ability_id()
-			== "shellbreaker"
-			and enemy.current_shield > 0
-		):
-
-			score -= 80.0
-
-		if score < best_score:
-
-			best_score = score
-
+		var distance := global_position.distance_squared_to(enemy.global_position)
+		if distance < best_distance:
+			best_distance = distance
 			best_enemy = enemy
-
 	return best_enemy
 
 func find_farthest_enemy() -> CharacterBody2D:
