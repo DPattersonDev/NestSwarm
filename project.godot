@@ -23,9 +23,7 @@ SynergyManager="*uid://rky8tafqi5xg"
 
 [display]
 
-window/size/viewport_width=1152
 window/size/viewport_height=720
-
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 
