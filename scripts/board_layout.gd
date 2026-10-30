@@ -4,13 +4,13 @@ extends RefCounted
 const LANES := 4
 const DEPTH := 4
 const IMAGE_RECT := Rect2(200, 0, 460, 690)
-const FLOOR := Rect2(260, 120, 340, 450)
+const FLOOR := Rect2(300, 120, 270, 490)
 const TILE_SIZE := Vector2(90, 78)
 const INVALID := Vector2i(-1, -1)
-const ROW_X := [[272, 428, 589, 749], [345, 510, 679], [255, 425, 595, 765], [338, 510, 685], [244, 422, 597, 777], [330, 509, 693], [233, 418, 603, 790], [321, 509, 700]]
-const ROW_Y := [339, 446, 558, 673, 794, 915, 1046, 1181]
-const ROW_WIDTH := [152, 164, 170, 174, 180, 182, 190, 192]
-const ROW_HEIGHT := [140, 138, 146, 148, 154, 162, 172, 168]
+const ROW_X := [[320, 449, 576, 705], [314, 446, 576, 708], [310, 445, 578, 713], [307, 444, 579, 717], [303, 443, 580, 721], [297, 441, 583, 729], [293, 439, 586, 735], [286, 437, 589, 741]]
+const ROW_Y := [324, 439, 563, 688, 823, 966, 1119, 1272]
+const ROW_WIDTH := [100, 103, 105, 107, 110, 112, 114, 116]
+const ROW_HEIGHT := [108, 114, 120, 124, 130, 136, 142, 146]
 static func to_global(cell: Vector2i, enemy: bool = false) -> Vector2i:
 	return Vector2i(cell.x, cell.y if enemy else 7 - cell.y)
 static func from_global(cell: Vector2i, enemy: bool = false) -> Vector2i:

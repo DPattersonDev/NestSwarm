@@ -18,7 +18,7 @@ func run() -> void:
 	root.add_child(placement)
 	placement.placement_timer_active = false
 	await process_frame
-	check(placement.grid_buttons.size() == 14, "Need fourteen actual player stones")
+	check(placement.grid_buttons.size() == 16, "Need sixteen player hexes")
 	var spots := [Vector2i(0, 3), Vector2i(1, 3), Vector2i(1, 0), Vector2i(2, 0)]
 	for i in range(4):
 		var cell: Vector2i = spots[i]
@@ -32,7 +32,7 @@ func run() -> void:
 	placement.place_character(state.selected_team[0], Vector2i(0, 2))
 	check(not placement.occupied_cells.has(Vector2i(0, 3)), "Old hex not cleared")
 	check(placement.occupied_cells.size() == 4, "Move duplicated unit")
-	check(not placement.can_place(state.selected_team[0], Vector2i(3, 0)), "Fourth player back slot should not exist")
+	check(placement.can_place(state.selected_team[0], Vector2i(3, 0)), "Fourth back-row slot must be available")
 	var game_script = load("res://game.gd").new()
 	for enemy in [false, true]:
 		for cell in Layout.all_cells(enemy):
@@ -52,7 +52,15 @@ func run() -> void:
 	state.player_placements["Veyra"] = Vector2i(6, 4)
 	game_script.repair_player_formation(state.selected_team)
 	check(game_script.formation_valid(state.selected_team, state.player_placements, false), "Previous-board placements were not repaired")
-	check(not game_script.formation_valid(state.selected_team, {"Veyra": Vector2i(0, 0), "Aurex": Vector2i(1, 0), "Melora": Vector2i(2, 0), "Zekrin": Vector2i(3, 0)}, true), "Enemy back row accepted four units")
+	check(game_script.formation_valid(state.selected_team, {"Veyra": Vector2i(0, 0), "Aurex": Vector2i(1, 0), "Melora": Vector2i(2, 0), "Zekrin": Vector2i(3, 0)}, true), "Enemy back row must accept four units")
+	placement.occupied_cells.clear()
+	state.player_placements.clear()
+	for depth in range(4):
+		for i in range(4):
+			placement.place_character(state.selected_team[i], Vector2i(i, depth))
+		check(placement.occupied_cells.size() == 4, "Full-row placement duplicated units")
+		for i in range(4):
+			check(state.player_placements[state.selected_team[i].character_name] == Vector2i(i, depth), "Could not place all four characters in a row")
 	game_script.free()
 	placement.queue_free()
 	await process_frame

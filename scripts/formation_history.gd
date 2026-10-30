@@ -31,4 +31,4 @@ func _draw() -> void:
 		draw_texture_rect(texture, Rect2(center - dimensions * 0.5, dimensions), false, Color(1, 1, 1, 0.75))
 func mini_center(cell: Vector2i) -> Vector2:
 	var row := cell.y
-	return Vector2(44 + cell.x * 34 + (17 if row % 2 else 0), 70 + row * 34)
+	return Vector2(44 + cell.x * 34, 70 + row * 34)

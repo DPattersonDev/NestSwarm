@@ -24,7 +24,7 @@ func run():
 	var board = load("res://scripts/arena_board.gd").new()
 	check(not board.placement, "Battle must not draw setup markings")
 	var layout = load("res://scripts/board_layout.gd")
-	check(layout.global_cells().size() == 28, "Approved map should contain 28 stones")
+	check(layout.global_cells().size() == 32, "Balanced map should contain 32 stones")
 	for cell in layout.global_cells():
 		check(layout.nearest(layout.center(cell)) == cell, "Stone centers overlap")
 	root.add_child(board)

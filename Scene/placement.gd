@@ -208,7 +208,7 @@ func create_placement_ui() -> void:
 	add_child(mini)
 	_ui_label("YOUR TEAM ↑", Vector2(24, 630), 16)
 	_ui_label("Your next move", Vector2(745, 425), 22)
-	_ui_label("Drag a teammate onto an empty hex.\nYour four starting rows are below.\nOnly three fit in the back row.\nEnemy positions stay hidden.", Vector2(745, 465), 16)
+	_ui_label("Drag a teammate onto an empty hex.\nYour four starting rows are below.\nFour hexes in every row.\nEnemy positions stay hidden.", Vector2(745, 465), 16)
 	for cell in layout.all_cells():
 		var button = preload("res://scripts/hex_placement_tile.gd").new()
 		button.placement_ui = self
