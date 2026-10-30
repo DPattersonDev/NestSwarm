@@ -12,21 +12,21 @@ func run():
 	state.reset_match()
 	check(state.get_visible_enemy_history().is_empty(), "First round must have no enemy history")
 	state.enemy_team.append(load("res://Data/Brontis.tres"))
-	state.enemy_placements["Brontis"] = Vector2i(0, 4)
+	state.enemy_placements["Brontis"] = Vector2i(0, 3)
 	state.remember_enemy_formation()
 	check(state.get_visible_enemy_history().is_empty(), "Current-round formation leaked")
 	state.current_round = 2
 	state.enemy_placements["Brontis"] = Vector2i(3, 0)
 	var past: Dictionary = state.get_visible_enemy_history()
-	check(past["cells"]["Brontis"] == Vector2i(0, 4), "History changed with secret current placement")
+	check(past["cells"]["Brontis"] == Vector2i(0, 3), "History changed with secret current placement")
 	past["cells"]["Brontis"] = Vector2i(1, 1)
-	check(state.get_visible_enemy_history()["cells"]["Brontis"] == Vector2i(0, 4), "Returned snapshot aliases saved history")
+	check(state.get_visible_enemy_history()["cells"]["Brontis"] == Vector2i(0, 3), "Returned snapshot aliases saved history")
 	var board = load("res://scripts/arena_board.gd").new()
 	check(not board.placement, "Battle must not draw setup markings")
 	var layout = load("res://scripts/board_layout.gd")
 	for enemy in [false, true]:
-		for lane in range(4):
-			for depth in range(5):
+		for lane in range(7):
+			for depth in range(4):
 				check(board.FLOOR.encloses(layout.cell_rect(Vector2i(lane, depth), enemy)), "Tile extends beyond playable floor")
 	root.add_child(board)
 	var unit = load("res://character/Character.tscn").instantiate()
@@ -45,7 +45,7 @@ func run():
 	check(bubble.visible, "Shield bubble vanished while shield was still active")
 	unit.position = Vector2(-200, 900)
 	board._physics_process(0.016)
-	check(unit.position.x >= 83 and unit.position.y <= 475, "Unit left playable floor after knockback")
+	check(unit.position.x >= board.FLOOR.position.x + 32 and unit.position.y <= board.FLOOR.end.y - 32, "Unit left playable floor after knockback")
 	unit.current_shield = 0
 	await process_frame
 	await process_frame
