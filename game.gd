@@ -92,34 +92,8 @@ var full_roster: Array[CharacterData] = []
 # PLACEMENT GRID SETTINGS
 # =========================================================
 
-const GRID_COLUMNS: int = 4
-const GRID_ROWS: int = 5
-
-
-# =========================================================
-# PLAYER BATTLEFIELD GRID
-# =========================================================
-
-const PLAYER_GRID_ORIGIN: Vector2 = Vector2(
-	100,
-	150
-)
-
-const PLAYER_DEPTH_SPACING: float = 75.0
-const PLAYER_LANE_SPACING: float = 100.0
-
-
-# =========================================================
-# OPPONENT BATTLEFIELD GRID
-# =========================================================
-
-const ENEMY_GRID_ORIGIN: Vector2 = Vector2(
-	980,
-	150
-)
-
-const ENEMY_DEPTH_SPACING: float = 75.0
-const ENEMY_LANE_SPACING: float = 100.0
+const GRID_COLUMNS: int = preload("res://scripts/board_layout.gd").LANES
+const GRID_ROWS: int = preload("res://scripts/board_layout.gd").DEPTH
 
 
 # =========================================================
@@ -127,18 +101,18 @@ const ENEMY_LANE_SPACING: float = 100.0
 # =========================================================
 
 var fallback_player_positions = [
-	Vector2(100, 150),
-	Vector2(100, 250),
-	Vector2(100, 350),
-	Vector2(100, 450)
+	preload("res://scripts/board_layout.gd").cell_center(Vector2i(0, 0)),
+	preload("res://scripts/board_layout.gd").cell_center(Vector2i(1, 0)),
+	preload("res://scripts/board_layout.gd").cell_center(Vector2i(2, 0)),
+	preload("res://scripts/board_layout.gd").cell_center(Vector2i(3, 0))
 ]
 
 
 var fallback_enemy_positions = [
-	Vector2(980, 150),
-	Vector2(980, 250),
-	Vector2(980, 350),
-	Vector2(980, 450)
+	preload("res://scripts/board_layout.gd").cell_center(Vector2i(0, 0), true),
+	preload("res://scripts/board_layout.gd").cell_center(Vector2i(1, 0), true),
+	preload("res://scripts/board_layout.gd").cell_center(Vector2i(2, 0), true),
+	preload("res://scripts/board_layout.gd").cell_center(Vector2i(3, 0), true)
 ]
 
 
@@ -177,6 +151,7 @@ var selected_character_was_defeated: bool = false
 # =========================================================
 
 func _ready() -> void:
+	RenderingServer.set_default_clear_color(Color("171e2b"))
 
 	add_child(preload("res://scripts/arena_board.gd").new())
 
@@ -989,7 +964,7 @@ func create_battle_ui() -> void:
 
 
 	winner_label.position = Vector2(
-		350,
+		188,
 		60
 	)
 
@@ -1022,7 +997,7 @@ func create_battle_ui() -> void:
 
 
 	score_label.position = Vector2(
-		430,
+		288,
 		10
 	)
 
