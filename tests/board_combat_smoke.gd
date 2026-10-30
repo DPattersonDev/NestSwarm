@@ -18,38 +18,41 @@ func run() -> void:
 	root.add_child(placement)
 	placement.placement_timer_active = false
 	await process_frame
-	check(placement.grid_buttons.size() == 28, "Need twenty-eight clickable squares")
+	check(placement.grid_buttons.size() == 14, "Need fourteen actual player stones")
+	var spots := [Vector2i(0, 3), Vector2i(1, 3), Vector2i(1, 0), Vector2i(2, 0)]
 	for i in range(4):
-		var cell := Vector2i(i, 3 if i < 2 else 0)
-		placement._on_character_button_pressed(state.selected_team[i])
-		placement._on_grid_button_pressed(cell)
+		var cell: Vector2i = spots[i]
+		placement.place_character(state.selected_team[i], cell)
 		check(state.player_placements[state.selected_team[i].character_name] == cell, "Placement not saved")
 		check(placement.grid_buttons[cell].position == Layout.cell_rect(cell).position, "Placement not using shared geometry")
 		check(placement.grid_buttons[cell].get_node("CharacterArt").texture != null, "Placed art missing")
 	check(not placement.start_round_button.disabled, "Four units must enable start")
-	placement._on_character_button_pressed(state.selected_team[0])
-	placement._on_grid_button_pressed(Vector2i(1, 3))
-	check(state.player_placements[state.selected_team[0].character_name] == Vector2i(0, 3), "Occupied cell overwrote another character")
-	placement._on_grid_button_pressed(Vector2i(0, 2))
-	check(not placement.occupied_cells.has(Vector2i(0, 3)), "Old square not cleared")
+	placement.place_character(state.selected_team[0], Vector2i(1, 3))
+	check(state.player_placements[state.selected_team[0].character_name] == Vector2i(0, 3), "Occupied hex overwritten")
+	placement.place_character(state.selected_team[0], Vector2i(0, 2))
+	check(not placement.occupied_cells.has(Vector2i(0, 3)), "Old hex not cleared")
 	check(placement.occupied_cells.size() == 4, "Move duplicated unit")
+	check(not placement.can_place(state.selected_team[0], Vector2i(3, 0)), "Fourth player back slot should not exist")
 	var game_script = load("res://game.gd").new()
-	for lane in range(7):
-		for depth in range(4):
-			var cell := Vector2i(lane, depth)
-			check(game_script.player_grid_to_world_position(cell) == Layout.cell_center(cell), "Player combat mapping mismatch")
-			check(game_script.enemy_grid_to_world_position(cell) == Layout.cell_center(cell, true), "Enemy combat mapping mismatch")
-	# New orientation: front rows meet at the center, back rows face away.
-	check(Layout.cell_center(Vector2i(0, 0)).y > Layout.cell_center(Vector2i(0, 3)).y, "Player front must be above back")
-	check(Layout.cell_center(Vector2i(0, 0), true).y < Layout.cell_center(Vector2i(0, 3), true).y, "Enemy front must be below back")
 	for enemy in [false, true]:
-		for depth in range(Layout.DEPTH):
-			check(Layout.backline(Layout.cell_center(Vector2i(2, depth), enemy), enemy, 2) == (depth < 2), "Backline targeting uses wrong axis")
-	var arena = load("res://scripts/arena_board.gd").new()
-	root.add_child(arena)
-	for cell in placement.grid_buttons:
-		check(placement.grid_buttons[cell].global_position == Layout.cell_rect(cell).position, "Placement square moved away from combat tile")
-	arena.queue_free()
+		for cell in Layout.all_cells(enemy):
+			var world: Vector2 = game_script.enemy_grid_to_world_position(cell) if enemy else game_script.player_grid_to_world_position(cell)
+			check(world == Layout.cell_center(cell, enemy), "Setup and combat mapping differ")
+	for enemy in [false, true]:
+		for cell in Layout.all_cells(enemy):
+			check(Layout.backline(Layout.cell_center(cell, enemy), enemy, 2) == (cell.y < 2), "Backline targeting uses wrong row")
+	var tile = placement.grid_buttons[Vector2i(0, 0)]
+	check(not tile._has_point(Vector2.ZERO), "Rectangular corner must not accept hex drops")
+	check(tile._has_point(tile.size * 0.5), "Hex center should be interactive")
+	var own_drag := {"character": state.selected_team[0], "source": placement.get_instance_id()}
+	check(tile._can_drop_data(tile.size * 0.5, own_drag), "Valid drag rejected")
+	tile._drop_data(tile.size * 0.5, own_drag)
+	check(state.player_placements[state.selected_team[0].character_name] == Vector2i(0, 0), "Drag drop did not save placement")
+	check(not tile._can_drop_data(Vector2.ZERO, {"character": state.selected_team[0], "source": -1}), "Foreign drag accepted")
+	state.player_placements["Veyra"] = Vector2i(6, 4)
+	game_script.repair_player_formation(state.selected_team)
+	check(game_script.formation_valid(state.selected_team, state.player_placements, false), "Previous-board placements were not repaired")
+	check(not game_script.formation_valid(state.selected_team, {"Veyra": Vector2i(0, 0), "Aurex": Vector2i(1, 0), "Melora": Vector2i(2, 0), "Zekrin": Vector2i(3, 0)}, true), "Enemy back row accepted four units")
 	game_script.free()
 	placement.queue_free()
 	await process_frame

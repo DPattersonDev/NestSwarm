@@ -104,7 +104,7 @@ var fallback_player_positions = [
 	preload("res://scripts/board_layout.gd").cell_center(Vector2i(0, 0)),
 	preload("res://scripts/board_layout.gd").cell_center(Vector2i(1, 0)),
 	preload("res://scripts/board_layout.gd").cell_center(Vector2i(2, 0)),
-	preload("res://scripts/board_layout.gd").cell_center(Vector2i(3, 0))
+	preload("res://scripts/board_layout.gd").cell_center(Vector2i(3, 1))
 ]
 
 
@@ -207,13 +207,14 @@ func _ready() -> void:
 	# CREATE OPPONENT FORMATION
 	# =====================================================
 
-	if GameState.enemy_placements.size() != 4:
+	if not formation_valid(enemy_team, GameState.enemy_placements, true):
 
 		create_random_enemy_placement(
 			enemy_team
 		)
 
 
+	repair_player_formation(player_team)
 	GameState.remember_enemy_formation()
 
 	# =====================================================
@@ -263,6 +264,10 @@ func _ready() -> void:
 	spawn_enemy_team(
 		enemy_team
 	)
+	var battlefield = get_node("HexBattlefield")
+	for unit in get_tree().get_nodes_in_group("Characters"):
+		if unit.get_parent() == self:
+			battlefield.register(unit)
 
 
 # =========================================================
@@ -603,6 +608,38 @@ func player_grid_to_world_position(grid_position: Vector2i) -> Vector2:
 func enemy_grid_to_world_position(grid_position: Vector2i) -> Vector2:
 	return preload("res://scripts/board_layout.gd").cell_center(grid_position, true)
 
+func formation_valid(team: Array, formation: Dictionary, enemy: bool) -> bool:
+	var layout = preload("res://scripts/board_layout.gd")
+	var used: Array[Vector2i] = []
+	var back_count := 0
+	for data in team:
+		var cell: Vector2i = formation.get(data.character_name, layout.INVALID)
+		if not layout.is_valid(cell, enemy) or cell in used:
+			return false
+		used.append(cell)
+		if cell.y == 0:
+			back_count += 1
+	return used.size() == 4 and back_count <= 3
+
+func repair_player_formation(team: Array) -> void:
+	var layout = preload("res://scripts/board_layout.gd")
+	var fixed := {}
+	var used: Array[Vector2i] = []
+	for data in team:
+		var cell: Vector2i = GameState.player_placements.get(data.character_name, layout.INVALID)
+		if layout.is_valid(cell) and not cell in used:
+			fixed[data.character_name] = cell
+			used.append(cell)
+	for data in team:
+		if fixed.has(data.character_name):
+			continue
+		for cell in layout.all_cells():
+			if not cell in used:
+				fixed[data.character_name] = cell
+				used.append(cell)
+				break
+	GameState.player_placements = fixed
+
 func create_random_enemy_placement(
 	enemy_team: Array
 ) -> void:
@@ -613,42 +650,23 @@ func create_random_enemy_placement(
 	var available_cells: Array[Vector2i] = []
 
 
-	for row in range(
-		GRID_ROWS
-	):
-
-		for column in range(
-			GRID_COLUMNS
-		):
-
-			available_cells.append(
-				Vector2i(
-					column,
-					row
-				)
-			)
-
+	available_cells = preload("res://scripts/board_layout.gd").all_cells(true)
 
 	available_cells.shuffle()
 
 
-	for i in range(
-		enemy_team.size()
-	):
-
-		var character_data = (
-			enemy_team[i]
-		)
-
-
-		var selected_cell: Vector2i = (
-			available_cells[i]
-		)
-
-
-		GameState.enemy_placements[
-			character_data.character_name
-		] = selected_cell
+	var back_count := 0
+	for data in enemy_team:
+		var cell: Vector2i = available_cells.pop_back()
+		if cell.y == 0 and back_count >= 3:
+			for candidate in available_cells:
+				if candidate.y != 0:
+					cell = candidate
+					available_cells.erase(candidate)
+					break
+		if cell.y == 0:
+			back_count += 1
+		GameState.enemy_placements[data.character_name] = cell
 
 
 	print("====================")
@@ -964,8 +982,8 @@ func create_battle_ui() -> void:
 
 
 	winner_label.position = Vector2(
-		188,
-		60
+		680,
+		90
 	)
 
 	winner_label.size = Vector2(
@@ -997,7 +1015,7 @@ func create_battle_ui() -> void:
 
 
 	score_label.position = Vector2(
-		288,
+		720,
 		10
 	)
 

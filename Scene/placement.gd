@@ -148,7 +148,7 @@ func _process(
 		return
 
 
-	if not placement_timer_active:
+	if not placement_timer_active or get_viewport().gui_is_dragging():
 		return
 
 
@@ -178,24 +178,17 @@ func _process(
 # =========================================================
 
 func create_placement_ui() -> void:
-	var atmosphere := TextureRect.new()
-	atmosphere.texture = preload("res://Art/Arenas/Vesper/vesper_arena_placeholder.png")
-	atmosphere.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	atmosphere.size = Vector2(1152, 760)
-	atmosphere.modulate = Color(0.22, 0.22, 0.22)
-	atmosphere.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(atmosphere)
+	var layout = preload("res://scripts/board_layout.gd")
 	var backdrop := TextureRect.new()
+	backdrop.texture = preload("res://Art/Arenas/Vesper/vesper_hex_arena.png")
 	backdrop.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	backdrop.texture = preload("res://Art/Arenas/Vesper/vesper_arena_placeholder.png")
-	backdrop.position = Vector2(160, 62)
-	backdrop.size = Vector2(556, 610)
-	backdrop.modulate = Color(0.65, 0.65, 0.65)
+	backdrop.position = layout.IMAGE_RECT.position
+	backdrop.size = layout.IMAGE_RECT.size
 	backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(backdrop)
-	_ui_label("ROUND %d  •  PLACE YOUR TEAM" % GameState.current_round, Vector2(24, 12), 25)
-	_ui_label("Choose a character below, then click a square. Your team starts below and fights UP.", Vector2(24, 49), 16)
-	placement_timer_label = _ui_label("", Vector2(24, 90), 16)
+	_ui_label("ROUND %d • PLACE YOUR TEAM" % GameState.current_round, Vector2(720, 25), 22)
+	_ui_label("Drag teammates onto your half of the arena.", Vector2(720, 65), 16)
+	placement_timer_label = _ui_label("", Vector2(24, 85), 16)
 	var pause := Button.new()
 	pause.position = Vector2(24, 125)
 	pause.size = Vector2(140, 32)
@@ -205,57 +198,57 @@ func create_placement_ui() -> void:
 		pause.text = "Resume timer" if not placement_timer_active else "Pause timer"
 	)
 	add_child(pause)
-	selected_label = _ui_label("Select a character from your team", Vector2(24, 180), 16)
-	selected_label.custom_minimum_size = Vector2(145, 120)
+	selected_label = _ui_label("", Vector2(24, 180), 16)
 	selected_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	selected_label.size = Vector2(145, 120)
-	var board := Control.new()
-	board.position = Vector2.ZERO
-	board.scale = Vector2.ONE
-	add_child(board)
-	var arena := preload("res://scripts/arena_board.gd").new()
-	arena.placement = true
-	board.add_child(arena)
+	selected_label.size = Vector2(150, 180)
 	var mini = preload("res://scripts/formation_history.gd").new()
 	mini.position = Vector2(745, 170)
 	mini.size = Vector2(220, 215)
 	mini.snapshot = GameState.get_visible_enemy_history()
 	add_child(mini)
-	_ui_label("Your next move", Vector2(745, 430), 22)
-	_ui_label("Place tanks near the center line.\nKeep ranged allies in the back rows.\nEnemy positions stay hidden.", Vector2(745, 470), 16)
-
-	var layout = preload("res://scripts/board_layout.gd")
-	for lane in range(GRID_COLUMNS):
-		for depth in range(GRID_ROWS):
-			var cell := Vector2i(lane, depth)
-			var button := Button.new()
-			button.position = layout.cell_rect(cell).position
-			button.size = layout.TILE_SIZE
-			button.tooltip_text = "Lane %d • Depth %d (%s)" % [lane + 1, depth + 1, "front" if depth == 3 else "back" if depth == 0 else "middle"]
-			button.pressed.connect(_on_grid_button_pressed.bind(cell))
-			board.add_child(button)
-			grid_buttons[cell] = button
-			var art := TextureRect.new()
-			art.name = "CharacterArt"
-			art.position = Vector2(4, 0)
-			art.size = Vector2(56, 49)
-			art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-			art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-			art.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			button.add_child(art)
-			var name_label := Label.new()
-			name_label.name = "Name"
-			name_label.position = Vector2(0, 48)
-			name_label.size = Vector2(64, 16)
-			name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-			name_label.add_theme_font_size_override("font_size", 11)
-			name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			button.add_child(name_label)
-
+	_ui_label("YOUR TEAM ↑", Vector2(24, 630), 16)
+	_ui_label("Your next move", Vector2(745, 425), 22)
+	_ui_label("Drag a teammate onto an empty hex.\nYour four starting rows are below.\nOnly three fit in the back row.\nEnemy positions stay hidden.", Vector2(745, 465), 16)
+	for cell in layout.all_cells():
+		var button = preload("res://scripts/hex_placement_tile.gd").new()
+		button.placement_ui = self
+		button.cell = cell
+		var rect: Rect2 = layout.cell_rect(cell)
+		button.position = rect.position
+		button.size = rect.size
+		for point in layout.polygon(layout.to_global(cell)):
+			button.points.append(point - rect.position)
+		button.tooltip_text = "Row %d • Hex %d" % [cell.y + 1, cell.x + 1]
+		button.pressed.connect(_on_grid_button_pressed.bind(cell))
+		for state in ["normal", "hover", "pressed", "focus", "disabled"]:
+			button.add_theme_stylebox_override(state, StyleBoxEmpty.new())
+		add_child(button)
+		grid_buttons[cell] = button
+		var art := TextureRect.new()
+		art.name = "CharacterArt"
+		art.position = rect.size * 0.5 - Vector2(30, 34)
+		art.size = Vector2(60, 60)
+		art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		art.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		button.add_child(art)
+		var label := Label.new()
+		label.name = "Name"
+		label.position = Vector2(0, rect.size.y - 20)
+		label.size = Vector2(rect.size.x, 16)
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.add_theme_font_size_override("font_size", 10)
+		label.add_theme_color_override("font_shadow_color", Color.BLACK)
+		label.add_theme_constant_override("shadow_offset_x", 1)
+		label.add_theme_constant_override("shadow_offset_y", 1)
+		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		button.add_child(label)
 	placement_count_label = _ui_label("", Vector2(24, 675), 16)
 	for index in range(GameState.selected_team.size()):
 		var data: CharacterData = GameState.selected_team[index]
-		var button := Button.new()
+		var button = preload("res://scripts/hex_placement_tile.gd").new()
+		button.placement_ui = self
+		button.character_data = data
 		button.position = Vector2(24 + index * 184, 700)
 		button.size = Vector2(176, 46)
 		button.icon = data.battle_texture
@@ -268,19 +261,27 @@ func create_placement_ui() -> void:
 	start_round_button = Button.new()
 	start_round_button.position = Vector2(790, 704)
 	start_round_button.size = Vector2(270, 40)
-	start_round_button.text = "START ROUND →"
+	start_round_button.text = "START ROUND"
 	start_round_button.pressed.connect(_on_start_round_pressed)
 	add_child(start_round_button)
 	trait_bar_label = _ui_label("", Vector2(745, 590), 13)
 	create_character_ledger()
 	var details := Button.new()
-	details.position = Vector2(880, 78)
+	details.position = Vector2(880, 110)
 	details.size = Vector2(180, 34)
 	details.text = "Character details"
 	details.pressed.connect(func():
 		get_node("CharacterLedger").visible = not get_node("CharacterLedger").visible
 	)
 	add_child(details)
+
+func can_place(data: CharacterData, cell: Vector2i) -> bool:
+	return not round_starting and data != null and data in GameState.selected_team and preload("res://scripts/board_layout.gd").is_valid(cell) and (not occupied_cells.has(cell) or occupied_cells[cell] == data)
+
+func place_character(data: CharacterData, cell: Vector2i) -> void:
+	if can_place(data, cell):
+		selected_character = data
+		_on_grid_button_pressed(cell)
 
 func _ui_label(text: String, at: Vector2, font_size: int) -> Label:
 	var label := Label.new()
@@ -1463,6 +1464,9 @@ func _on_grid_button_pressed(
 	cell_position: Vector2i
 ) -> void:
 
+	if not preload("res://scripts/board_layout.gd").is_valid(cell_position):
+		return
+
 	if round_starting:
 		return
 
@@ -1647,25 +1651,16 @@ func update_placement_ui() -> void:
 		button.text = ""
 		button.get_node("CharacterArt").texture = data.battle_texture if data != null else null
 		button.get_node("Name").text = data.character_name if data != null else "+" if selected_character != null else ""
-		var fill := Color("55402a")
-		var edge := Color("b18b48")
-		if data != null:
-			fill = Color("78603a")
-		if selected_character != null:
-			edge = Color("f4d58a") if data == selected_character else Color("e3bd68") if data == null else edge
-		var style = preload("res://scripts/arena_board.gd")._panel(fill, edge)
-		button.add_theme_stylebox_override("normal", style)
-		var hover = style.duplicate()
-		hover.border_color = Color("ffe1a1")
-		hover.set_border_width_all(3)
-		button.add_theme_stylebox_override("hover", hover)
-		button.add_theme_stylebox_override("focus", hover)
+		button.selected = data != null and data == selected_character
+		button.available = selected_character != null and can_place(selected_character, cell)
+		button.blocked = selected_character != null and not can_place(selected_character, cell)
+		button.queue_redraw()
 	for data in GameState.selected_team:
 		var button: Button = character_buttons[data.character_name]
 		var placed: bool = find_character_position(data) != Vector2i(-1, -1)
 		button.text = data.character_name + "\n" + ("PLACED" if placed else data.class_role)
 		button.modulate = Color("ffe1a1") if data == selected_character else Color.WHITE
-	selected_label.text = "Choose a square for " + selected_character.character_name if selected_character != null else "Choose a teammate below, then a square. Click a placed character to move it."
+	selected_label.text = "Choose a hex for " + selected_character.character_name if selected_character != null else "Drag a teammate from the bench onto an empty hex. Drag again to reposition."
 	placement_count_label.text = "Placed: %d / 4  •  Same positions when combat begins" % occupied_cells.size()
 	start_round_button.disabled = occupied_cells.size() != 4 or round_starting
 
@@ -1726,28 +1721,9 @@ func auto_place_unplaced_characters() -> void:
 	var available_cells: Array[Vector2i] = []
 
 
-	for row in range(
-		GRID_ROWS
-	):
-
-		for column in range(
-			GRID_COLUMNS
-		):
-
-			var cell_position = Vector2i(
-				column,
-				row
-			)
-
-
-			if not occupied_cells.has(
-				cell_position
-			):
-
-				available_cells.append(
-					cell_position
-				)
-
+	for cell in preload("res://scripts/board_layout.gd").all_cells():
+		if not occupied_cells.has(cell):
+			available_cells.append(cell)
 
 	available_cells.shuffle()
 

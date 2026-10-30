@@ -24,10 +24,9 @@ func run():
 	var board = load("res://scripts/arena_board.gd").new()
 	check(not board.placement, "Battle must not draw setup markings")
 	var layout = load("res://scripts/board_layout.gd")
-	for enemy in [false, true]:
-		for lane in range(7):
-			for depth in range(4):
-				check(board.FLOOR.encloses(layout.cell_rect(Vector2i(lane, depth), enemy)), "Tile extends beyond playable floor")
+	check(layout.global_cells().size() == 28, "Approved map should contain 28 stones")
+	for cell in layout.global_cells():
+		check(layout.nearest(layout.center(cell)) == cell, "Stone centers overlap")
 	root.add_child(board)
 	var unit = load("res://character/Character.tscn").instantiate()
 	unit.character_data = load("res://Data/Aurex.tres")
@@ -43,9 +42,9 @@ func run():
 	check(bubble.visible, "Shield bubble missing while shield active")
 	await create_timer(0.7).timeout
 	check(bubble.visible, "Shield bubble vanished while shield was still active")
-	unit.position = Vector2(-200, 900)
-	board._physics_process(0.016)
-	check(unit.position.x >= board.FLOOR.position.x + 32 and unit.position.y <= board.FLOOR.end.y - 32, "Unit left playable floor after knockback")
+	board.register(unit)
+	board.relocate(unit, Vector2(-200, 900))
+	check(unit.position == layout.center(layout.nearest(unit.position)), "Knockback did not settle on a stone")
 	unit.current_shield = 0
 	await process_frame
 	await process_frame

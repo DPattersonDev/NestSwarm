@@ -1,26 +1,17 @@
 [gd_scene format=3 uid="uid://dfx3h0t45p75n"]
 
 [ext_resource type="Script" uid="uid://f0b8nhx0orf6" path="res://game.gd" id="1_80nbo"]
-[ext_resource type="Texture2D" uid="uid://cd63os4o5toeg" path="res://Art/Arenas/Vesper/vesper_arena_placeholder.png" id="2_e2o6t"]
+[ext_resource type="Texture2D" path="res://Art/Arenas/Vesper/vesper_hex_arena.png" id="2_e2o6t"]
 
 [node name="Game" type="Node2D" unique_id=1019461165]
 script = ExtResource("1_80nbo")
 
-[node name="HiveBackdrop" type="TextureRect" parent="."]
-z_index = -11
-modulate = Color(0.22, 0.22, 0.22, 1)
-offset_right = 1152.0
-offset_bottom = 760.0
-texture = ExtResource("2_e2o6t")
-expand_mode = 1
-mouse_filter = 2
-
 [node name="AreanaBackground" type="TextureRect" parent="."]
 z_index = -10
-offset_left = 160.0
-offset_top = 62.0
-offset_right = 716.0
-offset_bottom = 672.0
+offset_left = 200.0
+offset_top = 0.0
+offset_right = 660.0
+offset_bottom = 690.0
 texture = ExtResource("2_e2o6t")
 expand_mode = 1
 mouse_filter = 2
