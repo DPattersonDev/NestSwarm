@@ -611,15 +611,12 @@ func enemy_grid_to_world_position(grid_position: Vector2i) -> Vector2:
 func formation_valid(team: Array, formation: Dictionary, enemy: bool) -> bool:
 	var layout = preload("res://scripts/board_layout.gd")
 	var used: Array[Vector2i] = []
-	var back_count := 0
 	for data in team:
 		var cell: Vector2i = formation.get(data.character_name, layout.INVALID)
 		if not layout.is_valid(cell, enemy) or cell in used:
 			return false
 		used.append(cell)
-		if cell.y == 0:
-			back_count += 1
-	return used.size() == 4 and back_count <= 3
+	return used.size() == 4
 
 func repair_player_formation(team: Array) -> void:
 	var layout = preload("res://scripts/board_layout.gd")
@@ -655,17 +652,8 @@ func create_random_enemy_placement(
 	available_cells.shuffle()
 
 
-	var back_count := 0
 	for data in enemy_team:
 		var cell: Vector2i = available_cells.pop_back()
-		if cell.y == 0 and back_count >= 3:
-			for candidate in available_cells:
-				if candidate.y != 0:
-					cell = candidate
-					available_cells.erase(candidate)
-					break
-		if cell.y == 0:
-			back_count += 1
 		GameState.enemy_placements[data.character_name] = cell
 
 
