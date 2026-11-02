@@ -287,6 +287,10 @@ func create_main_menu() -> void:
 	)
 
 
+	var pvp_button = create_menu_button("PRIVATE PVP TEST")
+	pvp_button.pressed.connect(func(): get_tree().change_scene_to_file("res://Scene/PrivatePvp.tscn"))
+	menu_container.add_child(pvp_button)
+
 	# =====================================================
 	# CHARACTERS BUTTON
 	# =====================================================

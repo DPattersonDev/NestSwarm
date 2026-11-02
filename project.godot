@@ -39,3 +39,4 @@ Characters=""
 
 rendering_device/driver.windows="d3d12"
 renderer/rendering_method="mobile"
+renderer/rendering_method.private_pvp="gl_compatibility"

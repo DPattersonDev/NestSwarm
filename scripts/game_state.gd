@@ -19,6 +19,9 @@ var enemy_team: Array = []
 # Stores all upgrades earned by each player character.
 var character_upgrades: Dictionary = {}
 
+# Separate loadout for the second player; empty in offline matches.
+var enemy_character_upgrades: Dictionary = {}
+
 
 # =========================================================
 # PLAYER PLACEMENT
@@ -254,6 +257,7 @@ func reset_match() -> void:
 
 
 	character_upgrades.clear()
+	enemy_character_upgrades.clear()
 
 
 	player_placements.clear()
