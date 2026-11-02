@@ -549,13 +549,12 @@ func _on_play_button_pressed() -> void:
 # CHARACTERS
 # =========================================================
 
-# Character roster screen will be
-# connected here when we build it.
+# Opens the read-only character browser.
 
 func _on_character_button_pressed() -> void:
 
-	print(
-		"Characters pressed"
+	get_tree().change_scene_to_file(
+		"res://Scene/CharacterBrowser.tscn"
 	)
 
 
