@@ -368,7 +368,7 @@ func _ready() -> void:
 	setup_battle_visual()
 	character_animation.setup()
 
-	if team_id == 1:
+	if team_id == 1 or not GameState.enemy_character_upgrades.is_empty():
 
 		apply_saved_upgrades()
 
@@ -456,24 +456,19 @@ func has_effect(
 	effect_id: String
 ) -> bool:
 
-	# Current dev enemy team has no upgrade loadout.
-	#
-	# When PvP is added, both teams will eventually
-	# read their upgrades from their own player state.
-	if team_id != 1:
-		return false
+	var saved: Dictionary = saved_upgrade_loadout()
 
 	var character_name: String = (
 		get_character_name()
 	)
 
-	if not GameState.character_upgrades.has(
+	if not saved.has(
 		character_name
 	):
 
 		return false
 
-	for upgrade in GameState.character_upgrades[
+	for upgrade in saved[
 		character_name
 	]:
 
@@ -6601,7 +6596,11 @@ func is_untargetable() -> bool:
 # APPLY SAVED UPGRADES
 # =========================================================
 
+func saved_upgrade_loadout() -> Dictionary:
+	return GameState.character_upgrades if team_id == 1 else GameState.enemy_character_upgrades
+
 func apply_saved_upgrades() -> void:
+	var saved: Dictionary = saved_upgrade_loadout()
 
 	if character_data == null:
 		return
@@ -6610,14 +6609,14 @@ func apply_saved_upgrades() -> void:
 		character_data.character_name
 	)
 
-	if not GameState.character_upgrades.has(
+	if not saved.has(
 		character_name
 	):
 
 		return
 
 	var upgrades = (
-		GameState.character_upgrades[
+		saved[
 			character_name
 		]
 	)
