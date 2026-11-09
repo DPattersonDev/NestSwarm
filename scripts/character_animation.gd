@@ -38,8 +38,8 @@ func setup() -> void:
 		and sprite.texture != null
 	)
 	if enabled:
-		var atlas_path: String = "res://Art/Animations/" + character.character_data.character_name + ".png"
-		if ResourceLoader.exists(atlas_path):
+		var atlas_path: String = _find_animation_atlas()
+		if atlas_path != "":
 			frame_sprite = Sprite2D.new()
 			frame_sprite.texture = load(atlas_path)
 			frame_sprite.hframes = 4
@@ -51,6 +51,22 @@ func setup() -> void:
 			pivot.add_child(frame_sprite)
 		player.animation_finished.connect(_on_animation_finished)
 		play_pose(&"idle")
+
+# Search the character's faction folder first, then support the original
+# flat layout so older sprite sheets and new factions both keep working.
+func _find_animation_atlas() -> String:
+	if character.character_data == null:
+		return ""
+	var character_name: String = character.character_data.character_name
+	var faction: String = character.character_data.faction
+	var candidates: Array[String] = [
+		"res://Art/Animations/%s/%s.png" % [faction, character_name],
+		"res://Art/Animations/%s.png" % character_name
+	]
+	for path in candidates:
+		if ResourceLoader.exists(path):
+			return path
+	return ""
 
 # Read actual movement without changing targeting, damage, or attack timers.
 func _process(_delta: float) -> void:
