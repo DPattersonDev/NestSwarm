@@ -101,7 +101,13 @@ func _update_body_motion(delta: float) -> void:
 		pivot.position = Vector2.ZERO
 		pivot.rotation = 0.0
 		return
-	var walking: bool = character.velocity.length_squared() > 1.0 and action == &""
+	if action != &"":
+		motion_weight = 0.0
+		pivot.position = Vector2.ZERO
+		pivot.rotation = 0.0
+		player.speed_scale = 1.0
+		return
+	var walking: bool = character.velocity.length_squared() > 1.0
 	var target_weight: float = 1.0 if walking else 0.0
 	motion_weight = move_toward(motion_weight, target_weight, delta * 9.0)
 	if walking:
