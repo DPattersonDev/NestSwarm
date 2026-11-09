@@ -7,6 +7,9 @@ extends Node
 @onready var pivot: Node2D = character.get_node("VisualPivot")
 @onready var sprite: Sprite2D = pivot.get_node("BattleSprite")
 
+# Cache the visible figure height instead of using the whole sprite-cell height.
+# Generated animation atlases may have generous transparent margins.
+static var visible_height_cache: Dictionary = {}
 var frame_sprite: Sprite2D
 var pose_time: float = 0.0
 var current_pose: StringName = &"idle"
@@ -41,7 +44,8 @@ func setup() -> void:
 			frame_sprite.texture = load(atlas_path)
 			frame_sprite.hframes = 4
 			frame_sprite.vframes = 2
-			var factor: float = 70.0 / (float(frame_sprite.texture.get_height()) / 2.0)
+			var visible_height: float = _measure_walk_figure_height(atlas_path, frame_sprite.texture)
+			var factor: float = 70.0 / visible_height
 			frame_sprite.scale = Vector2(factor, factor)
 			frame_sprite.visible = false
 			pivot.add_child(frame_sprite)
@@ -121,6 +125,34 @@ func _update_body_motion(delta: float) -> void:
 		player.speed_scale = clampf(stride_frequency / 8.0, 0.75, 1.4)
 	else:
 		player.speed_scale = 1.0
+
+# Match the visual height of the idle portrait (70 px in setup_battle_visual).
+# Walk frames are used rather than attack frames because effects and lunges
+# should not alter the apparent body size. Ignore low-alpha background residue.
+func _measure_walk_figure_height(atlas_path: String, atlas: Texture2D) -> float:
+	if visible_height_cache.has(atlas_path):
+		return float(visible_height_cache[atlas_path])
+	var cell_height: int = maxi(1, atlas.get_height() / 2)
+	var cell_width: int = maxi(1, atlas.get_width() / 4)
+	var result: float = float(cell_height)
+	var img: Image = atlas.get_image()
+	if img != null and not img.is_empty():
+		var heights: Array[int] = []
+		for frame in range(4):
+			var top: int = cell_height
+			var bottom: int = -1
+			for y in range(0, cell_height, 2):
+				for x in range(frame * cell_width, mini((frame + 1) * cell_width, img.get_width()), 2):
+					if img.get_pixel(x, y).a > 0.80:
+						top = mini(top, y)
+						bottom = maxi(bottom, y)
+			if bottom >= top:
+				heights.append(bottom - top + 1)
+		if not heights.is_empty():
+			# Maximum figure extent prevents unwanted per-frame zooming.
+			result = float(heights.max())
+	visible_height_cache[atlas_path] = maxf(result, 1.0)
+	return float(visible_height_cache[atlas_path])
 
 func face_target() -> void:
 
