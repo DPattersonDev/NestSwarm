@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://8xnpnp86elke"
-path="res://.godot/imported/Veyra.png-6f375e6ac15c044f14dff9df3b29d4c4.ctex"
+uid="uid://dysc7n4tkwepl"
+path="res://.godot/imported/Velkara.png-eb7e08c8848568c368553c7ce91313c0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Art/Animations/Veyra.png"
-dest_files=["res://.godot/imported/Veyra.png-6f375e6ac15c044f14dff9df3b29d4c4.ctex"]
+source_file="res://Art/Animations/Anttalope/Velkara.png"
+dest_files=["res://.godot/imported/Velkara.png-eb7e08c8848568c368553c7ce91313c0.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cjruigqjjwb7q"
-path="res://.godot/imported/Zekrin.png-bb58f4db42a7a23bafaa4855809e6ceb.ctex"
+uid="uid://caecb10dspkwt"
+path="res://.godot/imported/Melora.png-5910177aba9ab632287b4d8f9eca962c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Art/Animations/Zekrin.png"
-dest_files=["res://.godot/imported/Zekrin.png-bb58f4db42a7a23bafaa4855809e6ceb.ctex"]
+source_file="res://Art/Animations/Vesper/Melora.png"
+dest_files=["res://.godot/imported/Melora.png-5910177aba9ab632287b4d8f9eca962c.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://l5iefr0soc5r"
-path="res://.godot/imported/Aurex.png-ca453174bcd17fc9c0e8eebcc6014e03.ctex"
+uid="uid://8xnpnp86elke"
+path="res://.godot/imported/Veyra.png-ba27305a5ccfa352b08f254f17d49624.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Art/Animations/Aurex.png"
-dest_files=["res://.godot/imported/Aurex.png-ca453174bcd17fc9c0e8eebcc6014e03.ctex"]
+source_file="res://Art/Animations/Vesper/Veyra.png"
+dest_files=["res://.godot/imported/Veyra.png-ba27305a5ccfa352b08f254f17d49624.ctex"]
 
 [params]
 

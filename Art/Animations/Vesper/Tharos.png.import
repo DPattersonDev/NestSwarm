@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://caecb10dspkwt"
-path="res://.godot/imported/Melora.png-a196857fc06c28d3dd88d987e34c8777.ctex"
+uid="uid://d3g3xfwh53k00"
+path="res://.godot/imported/Tharos.png-9b50575de3029a8df997a42944578459.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Art/Animations/Melora.png"
-dest_files=["res://.godot/imported/Melora.png-a196857fc06c28d3dd88d987e34c8777.ctex"]
+source_file="res://Art/Animations/Vesper/Tharos.png"
+dest_files=["res://.godot/imported/Tharos.png-9b50575de3029a8df997a42944578459.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d3g3xfwh53k00"
-path="res://.godot/imported/Tharos.png-6e3f2e53f18d9a03ca1d4bd3dc06fbec.ctex"
+uid="uid://c1hbpfpr11cb0"
+path="res://.godot/imported/Nyxis.png-e118760d72a16b9b6c4a42ba4c2a1bc6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Art/Animations/Tharos.png"
-dest_files=["res://.godot/imported/Tharos.png-6e3f2e53f18d9a03ca1d4bd3dc06fbec.ctex"]
+source_file="res://Art/Animations/Anttalope/Nyxis.png"
+dest_files=["res://.godot/imported/Nyxis.png-e118760d72a16b9b6c4a42ba4c2a1bc6.ctex"]
 
 [params]
 
