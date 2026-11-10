@@ -724,7 +724,7 @@ func update_selection_ui() -> void:
 		)
 
 
-		button.set_card_selected(selected_characters.has(character))
+		button.call("set_card_selected", selected_characters.has(character))
 
 
 	start_button.disabled = (
