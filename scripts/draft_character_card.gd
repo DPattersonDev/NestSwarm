@@ -6,20 +6,22 @@ var _selected_overlay: ColorRect
 var _border_normal: StyleBoxFlat
 var _border_hover: StyleBoxFlat
 
-func setup(character: CharacterData, card_size: Vector2 = Vector2(200, 202)) -> void:
+func setup(character: CharacterData, card_size: Vector2 = Vector2(200, 202), opening_draft: bool = false) -> void:
 	custom_minimum_size = card_size
 	text = ""
 	clip_contents = true
 	focus_mode = Control.FOCUS_ALL
 	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	_build_styles()
+	var header_height: float = 42.0 if opening_draft else 49.0
+	var stats_height: float = 54.0 if opening_draft else 64.0
 	# Use the ORIGINAL, character-specific game art. Crop in memory only:
 	# no replacement portraits, external assets or edited PNGs.
 	var portrait := TextureRect.new()
 	portrait.anchor_right = 1.0
 	portrait.anchor_bottom = 1.0
-	portrait.offset_top = 45.0
-	portrait.offset_bottom = -62.0
+	portrait.offset_top = header_height
+	portrait.offset_bottom = -stats_height
 	portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
@@ -28,12 +30,18 @@ func setup(character: CharacterData, card_size: Vector2 = Vector2(200, 202)) -> 
 		var art_size: Vector2 = original_art.get_size()
 		var head_and_torso := AtlasTexture.new()
 		head_and_torso.atlas = original_art
-		# The top ~58% of the original full-body illustration contains
-		# the head, armor and upper body. Center that in the card.
-		head_and_torso.region = Rect2(
-			0.0, art_size.y * 0.04,
-			art_size.x, art_size.y * 0.54
-		)
+		if opening_draft:
+			# Tighter face-and-shoulders framing only for the opening
+			# eight-card grid; the between-round screen is untouched.
+			head_and_torso.region = Rect2(
+				art_size.x * 0.14, art_size.y * 0.015,
+				art_size.x * 0.72, art_size.y * 0.43
+			)
+		else:
+			head_and_torso.region = Rect2(
+				0.0, art_size.y * 0.04,
+				art_size.x, art_size.y * 0.54
+			)
 		portrait.texture = head_and_torso
 	add_child(portrait)
 
@@ -47,7 +55,7 @@ func setup(character: CharacterData, card_size: Vector2 = Vector2(200, 202)) -> 
 	var header := ColorRect.new()
 	header.color = Color(0.04, 0.06, 0.12, 0.76)
 	header.anchor_right = 1.0
-	header.offset_bottom = 49.0
+	header.offset_bottom = header_height
 	header.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(header)
 
@@ -69,8 +77,8 @@ func setup(character: CharacterData, card_size: Vector2 = Vector2(200, 202)) -> 
 	role_label.text = "%s  ·  %s" % [character.faction, character.class_role]
 	role_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	role_label.anchor_right = 1.0
-	role_label.offset_top = 27.0
-	role_label.offset_bottom = 45.0
+	role_label.offset_top = 26.0
+	role_label.offset_bottom = 42.0 if opening_draft else 45.0
 	role_label.add_theme_font_size_override("font_size", 11)
 	role_label.add_theme_color_override("font_color", Color(0.83, 0.90, 0.97))
 	role_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -81,7 +89,7 @@ func setup(character: CharacterData, card_size: Vector2 = Vector2(200, 202)) -> 
 	stats_panel.anchor_top = 1.0
 	stats_panel.anchor_bottom = 1.0
 	stats_panel.anchor_right = 1.0
-	stats_panel.offset_top = -64.0
+	stats_panel.offset_top = -stats_height
 	stats_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(stats_panel)
 
@@ -98,7 +106,7 @@ func setup(character: CharacterData, card_size: Vector2 = Vector2(200, 202)) -> 
 	stats.anchor_top = 1.0
 	stats.anchor_bottom = 1.0
 	stats.anchor_right = 1.0
-	stats.offset_top = -62.0
+	stats.offset_top = -stats_height + 2.0
 	stats.offset_bottom = -3.0
 	stats.add_theme_font_size_override("font_size", 12)
 	stats.add_theme_color_override("font_color", Color.WHITE)
