@@ -1,5 +1,7 @@
 extends Control
 
+const DraftCharacterCard = preload("res://scripts/draft_character_card.gd")
+
 
 # =========================================================
 # CHARACTER SELECT TIMER
@@ -474,23 +476,9 @@ func create_selection_ui() -> void:
 		)
 
 
-		var button = Button.new()
+		var button = DraftCharacterCard.new()
 
-
-		# Reduced slightly so both rows fit
-		# comfortably with the new timer.
-		button.custom_minimum_size = Vector2(
-			200,
-			160
-		)
-
-
-		button.text = (
-			create_character_card_text(
-				character
-			)
-		)
-
+		button.setup(character, Vector2(200, 202))
 
 		button.pressed.connect(
 			_on_character_button_pressed.bind(
@@ -736,25 +724,7 @@ func update_selection_ui() -> void:
 		)
 
 
-		if selected_characters.has(
-			character
-		):
-
-			button.text = (
-				"SELECTED\n"
-				+ create_character_card_text(
-					character
-				)
-			)
-
-
-		else:
-
-			button.text = (
-				create_character_card_text(
-					character
-				)
-			)
+		button.set_card_selected(selected_characters.has(character))
 
 
 	start_button.disabled = (
