@@ -1,5 +1,7 @@
 extends Control
 
+const DraftCharacterCard = preload("res://scripts/draft_character_card.gd")
+
 
 # =========================================================
 # FULL CHARACTER ROSTER
@@ -443,20 +445,9 @@ func show_sacrifice_choices() -> void:
 		)
 
 
-		var button = Button.new()
+		var button = DraftCharacterCard.new()
 
-
-		button.custom_minimum_size = Vector2(
-			205,
-			150
-		)
-
-
-		button.text = (
-			create_character_text(
-				character
-			)
-		)
+		button.setup(character, Vector2(205, 240))
 
 
 		button.pressed.connect(
@@ -522,6 +513,11 @@ func _on_sacrifice_character_pressed(
 		index
 	)
 
+	# Highlight the chosen card without replacing its portrait or stats.
+	for i in range(character_container.get_child_count()):
+		var card = character_container.get_child(i)
+		if card.has_method("set_card_selected"):
+			card.set_card_selected(i == index)
 
 	var character = (
 		GameState.selected_team[
@@ -729,20 +725,9 @@ func show_replacement_choices() -> void:
 		)
 
 
-		var button = Button.new()
+		var button = DraftCharacterCard.new()
 
-
-		button.custom_minimum_size = Vector2(
-			205,
-			150
-		)
-
-
-		button.text = (
-			create_character_text(
-				character
-			)
-		)
+		button.setup(character, Vector2(205, 240))
 
 
 		button.pressed.connect(
