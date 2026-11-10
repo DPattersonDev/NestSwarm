@@ -25,24 +25,32 @@ func setup(character: CharacterData, card_size: Vector2 = Vector2(200, 202), ope
 	portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-	var original_art: Texture2D = character.battle_texture
-	if original_art != null:
-		var art_size: Vector2 = original_art.get_size()
-		var head_and_torso := AtlasTexture.new()
-		head_and_torso.atlas = original_art
-		if opening_draft:
-			# Tighter face-and-shoulders framing only for the opening
-			# eight-card grid; the between-round screen is untouched.
-			head_and_torso.region = Rect2(
-				art_size.x * 0.14, art_size.y * 0.015,
-				art_size.x * 0.72, art_size.y * 0.43
-			)
-		else:
-			head_and_torso.region = Rect2(
-				0.0, art_size.y * 0.04,
-				art_size.x, art_size.y * 0.54
-			)
-		portrait.texture = head_and_torso
+	# Dedicated portraits are optional. This keeps the other five factions
+	# working until their headshot files are added.
+	var portrait_path: String = "res://Art/Portraits/%s/%s.png" % [
+		character.faction, character.character_name
+	]
+	if ResourceLoader.exists(portrait_path):
+		portrait.texture = load(portrait_path) as Texture2D
+	else:
+		var original_art: Texture2D = character.battle_texture
+		if original_art != null:
+			var art_size: Vector2 = original_art.get_size()
+			var head_and_torso := AtlasTexture.new()
+			head_and_torso.atlas = original_art
+			if opening_draft:
+				# Tighter face-and-shoulders framing only for the opening
+				# eight-card grid; the between-round screen is untouched.
+				head_and_torso.region = Rect2(
+					art_size.x * 0.14, art_size.y * 0.015,
+					art_size.x * 0.72, art_size.y * 0.43
+				)
+			else:
+				head_and_torso.region = Rect2(
+					0.0, art_size.y * 0.04,
+					art_size.x, art_size.y * 0.54
+				)
+			portrait.texture = head_and_torso
 	add_child(portrait)
 
 	# This remains below all labels, so the highlight never hides stats.
