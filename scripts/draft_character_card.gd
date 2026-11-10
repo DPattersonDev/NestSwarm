@@ -13,12 +13,28 @@ func setup(character: CharacterData, card_size: Vector2 = Vector2(200, 202)) -> 
 	focus_mode = Control.FOCUS_ALL
 	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	_build_styles()
+	# Use the ORIGINAL, character-specific game art. Crop in memory only:
+	# no replacement portraits, external assets or edited PNGs.
 	var portrait := TextureRect.new()
-	portrait.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	portrait.anchor_right = 1.0
+	portrait.anchor_bottom = 1.0
+	portrait.offset_top = 45.0
+	portrait.offset_bottom = -62.0
 	portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-	portrait.texture = character.battle_texture
+	var original_art: Texture2D = character.battle_texture
+	if original_art != null:
+		var art_size: Vector2 = original_art.get_size()
+		var head_and_torso := AtlasTexture.new()
+		head_and_torso.atlas = original_art
+		# The top ~58% of the original full-body illustration contains
+		# the head, armor and upper body. Center that in the card.
+		head_and_torso.region = Rect2(
+			0.0, art_size.y * 0.04,
+			art_size.x, art_size.y * 0.54
+		)
+		portrait.texture = head_and_torso
 	add_child(portrait)
 
 	# This remains below all labels, so the highlight never hides stats.
@@ -112,7 +128,7 @@ func _build_styles() -> void:
 func set_card_selected(is_selected: bool) -> void:
 	if not is_instance_valid(_selected_overlay):
 		return
-	_selected_overlay.color = Color(0.89, 0.93, 1.0, 0.24 if is_selected else 0.0)
+	_selected_overlay.color = Color(0.89, 0.93, 1.0, 0.07 if is_selected else 0.0)
 	var edge := Color(0.95, 0.97, 1.0) if is_selected else Color(0.27, 0.34, 0.43)
 	_border_normal.border_color = edge
 	_border_normal.set_border_width_all(4 if is_selected else 3)
