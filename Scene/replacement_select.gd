@@ -517,7 +517,7 @@ func _on_sacrifice_character_pressed(
 	for i in range(character_container.get_child_count()):
 		var card = character_container.get_child(i)
 		if card.has_method("set_card_selected"):
-			card.set_card_selected(i == index)
+			card.call("set_card_selected", i == index)
 
 	var character = (
 		GameState.selected_team[
