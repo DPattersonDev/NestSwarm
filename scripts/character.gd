@@ -1598,7 +1598,8 @@ func attack_target() -> void:
 	# target survives at <=15% HP, finish it with another damage event.
 	if execute_threshold > 0.0 and attacked_target.is_alive:
 		if attacked_target.current_health <= int(floor(float(attacked_target.max_health) * execute_threshold)):
-			attacked_target.take_damage(attacked_target.current_health + attacked_target.current_shield, self, true)
+			# Use the normal damage path so death synergies, kill credit and visuals fire.
+			attacked_target.take_damage(999999, self, true)
 
 	# Extra hits never recursively invoke attack_target().
 	if bonus_hit_every > 0 and attack_count % bonus_hit_every == 0 and attacked_target.is_alive:
