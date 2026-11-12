@@ -53,6 +53,12 @@ var previous_target: CharacterBody2D = null
 
 var attack_timer: float = 0.0
 
+# Equipment-only combat modifiers, applied from the saved upgrade loadout.
+var range_hex_bonus: int = 0
+var execute_threshold: float = 0.0
+var reactive_shield_amount: int = 0
+var bonus_hit_every: int = 0
+
 var attack_count: int = 0
 
 var same_target_attack_count: int = 0
@@ -1187,6 +1193,10 @@ func _physics_process(
 
 	check_wing_rush()
 
+	if reactive_shield_amount > 0 and current_health > 0 and current_health * 2 < max_health and not flag_used("reactive_exoframe_used"):
+		set_flag("reactive_exoframe_used")
+		receive_shield(reactive_shield_amount, 5.0)
+
 	if attack_timer > 0.0:
 
 		attack_timer -= delta
@@ -1518,6 +1528,9 @@ func attack_target() -> void:
 			+ " activated Shellbreaker!"
 		)
 
+	# A range extension adds reach, not full-power ranged attacks for melee.
+	final_damage = apply_extended_range_damage(final_damage, attacked_target)
+
 	var target_was_alive: bool = (
 		attacked_target.is_alive
 	)
@@ -1580,6 +1593,16 @@ func attack_target() -> void:
 		self,
 		true
 	)
+
+	# Execution requires a real landed damaging basic attack. If the
+	# target survives at <=15% HP, finish it with another damage event.
+	if execute_threshold > 0.0 and attacked_target.is_alive:
+		if attacked_target.current_health <= int(floor(float(attacked_target.max_health) * execute_threshold)):
+			attacked_target.take_damage(attacked_target.current_health + attacked_target.current_shield, self, true)
+
+	# Extra hits never recursively invoke attack_target().
+	if bonus_hit_every > 0 and attack_count % bonus_hit_every == 0 and attacked_target.is_alive:
+		attacked_target.take_damage(maxi(1, roundi(float(final_damage) * 0.5)), self, true)
 
 	debug_log(
 		str(name)
@@ -6264,6 +6287,44 @@ func get_movement_stop_range() -> float:
 	return result
 
 # =========================================================
+# HEX ATTACK RANGE
+# =========================================================
+# Natural melee reach is one hex. Support has two; Marksman three.
+# Extra range from equipment applies a damage tradeoff only when used.
+func get_natural_attack_hexes() -> int:
+	if character_data == null:
+		return 1
+	match character_data.class_role:
+		"Marksman":
+			return 3
+		"Support":
+			return 2
+		_:
+			return 1
+
+func get_attack_range_hexes() -> int:
+	var reach: int = get_natural_attack_hexes() + range_hex_bonus
+	# Existing temporary +25 pixel reach abilities translate to one extra hex.
+	if get_current_attack_range() >= 4000.0:
+		return 8
+	if get_current_attack_range() > attack_range + 10.0:
+		reach += 1
+	return mini(reach, 8)
+
+func get_target_hex_steps(victim: CharacterBody2D) -> int:
+	if not is_instance_valid(victim):
+		return 999
+	var layout = preload("res://scripts/board_layout.gd")
+	return layout.hex_steps(layout.nearest(position), layout.nearest(victim.position))
+
+func apply_extended_range_damage(raw_damage: int, victim: CharacterBody2D) -> int:
+	var extra_steps: int = maxi(0, get_target_hex_steps(victim) - get_natural_attack_hexes())
+	if extra_steps <= 0:
+		return raw_damage
+	var multiplier: float = 0.75 if extra_steps == 1 else 0.60
+	return maxi(1, roundi(float(raw_damage) * multiplier))
+
+# =========================================================
 # CURRENT ATTACK RANGE
 # =========================================================
 
@@ -6671,6 +6732,18 @@ func apply_saved_upgrades() -> void:
 					"range_bonus"
 				]
 			)
+
+		if upgrade.has("range_hex_bonus"):
+			range_hex_bonus += int(upgrade["range_hex_bonus"])
+
+		if upgrade.has("execute_threshold"):
+			execute_threshold = maxf(execute_threshold, float(upgrade["execute_threshold"]))
+
+		if upgrade.has("reactive_shield"):
+			reactive_shield_amount = maxi(reactive_shield_amount, int(upgrade["reactive_shield"]))
+
+		if upgrade.has("bonus_hit_every"):
+			bonus_hit_every = int(upgrade["bonus_hit_every"])
 
 		if upgrade.has(
 			"cooldown_reduction"
