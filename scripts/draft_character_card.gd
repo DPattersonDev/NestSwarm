@@ -41,9 +41,12 @@ func setup(character: CharacterData, card_size: Vector2 = Vector2(200, 202), ope
 			if opening_draft:
 				# Tighter face-and-shoulders framing only for the opening
 				# eight-card grid; the between-round screen is untouched.
+				# Use a much shallower slice: on a landscape card, the
+				# old 43%-height source was center-cropped toward the torso.
+				# This version prioritizes the face and headpiece.
 				head_and_torso.region = Rect2(
-					art_size.x * 0.14, art_size.y * 0.015,
-					art_size.x * 0.72, art_size.y * 0.43
+					art_size.x * 0.08, art_size.y * 0.005,
+					art_size.x * 0.84, art_size.y * 0.29
 				)
 			else:
 				head_and_torso.region = Rect2(

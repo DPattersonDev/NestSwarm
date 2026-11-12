@@ -478,7 +478,7 @@ func create_selection_ui() -> void:
 
 		var button = DraftCharacterCard.new()
 
-		button.setup(character, Vector2(200, 202))
+		button.setup(character, Vector2(200, 224), true)
 
 		button.pressed.connect(
 			_on_character_button_pressed.bind(
