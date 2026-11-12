@@ -253,93 +253,15 @@ var basic_abilities: Dictionary = {
 # =========================================================
 
 var equipment: Array = [
-
-	{
-		"id": "up_armored",
-		"name": "Up-Armored",
-		"type": "Item",
-		"description": "+40 Maximum Health",
-		"health_bonus": 40
-	},
-
-	{
-		"id": "kinetic_overcharge",
-		"name": "Kinetic Overcharge",
-		"type": "Item",
-		"description": "+6 Damage",
-		"damage_bonus": 6
-	},
-
-	{
-		"id": "quantum_thrusters",
-		"name": "Quantum Thrusters",
-		"type": "Item",
-		"description": "+30 Move Speed",
-		"move_speed_bonus": 30
-	},
-
-	{
-		"id": "targeting_system",
-		"name": "Targeting System",
-		"type": "Item",
-		"description": "+25 Attack Range",
-		"range_bonus": 25
-	},
-
-	{
-		"id": "rapid_cycle_mechanism",
-		"name": "Rapid Cycle Mechanism",
-		"type": "Item",
-		"description": "-0.15s Attack Cooldown",
-		"cooldown_reduction": 0.15
-	},
-
-	{
-		"id": "fragmentation_plating",
-		"name": "Fragmentation Plating",
-		"type": "Item",
-		"description": "+30 Maximum Health\n+2 Damage",
-		"health_bonus": 30,
-		"damage_bonus": 2
-	},
-
-	{
-		"id": "reactive_exoframe",
-		"name": "Reactive Exoframe",
-		"type": "Item",
-		"description": "+25 Maximum Health\n+15 Move Speed",
-		"health_bonus": 25,
-		"move_speed_bonus": 15
-	},
-
-	{
-		"id": "overdrive_ignition",
-		"name": "Overdrive Ignition",
-		"type": "Item",
-		"description": "+4 Damage\n+12 Move Speed",
-		"damage_bonus": 4,
-		"move_speed_bonus": 12
-	},
-
-	{
-		"id": "long_barrel_conversion",
-		"name": "Long-Barrel Conversion",
-		"type": "Item",
-		"description": "+3 Damage\n+15 Attack Range",
-		"damage_bonus": 3,
-		"range_bonus": 15
-	},
-
-	{
-		"id": "rapid_chamber",
-		"name": "Rapid Chamber",
-		"type": "Item",
-		"description": "+2 Damage\n-0.10s Attack Cooldown",
-		"damage_bonus": 2,
-		"cooldown_reduction": 0.10
-	}
+	{"id": "up_armored", "name": "Up-Armored", "type": "Item", "description": "+100 Maximum Health", "health_bonus": 100, "max_copies": 2},
+	{"id": "kinetic_overcharge", "name": "Kinetic Overcharge", "type": "Item", "description": "+8 Damage", "damage_bonus": 8, "max_copies": 2},
+	{"id": "quantum_thrusters", "name": "Quantum Thrusters", "type": "Item", "description": "+35 Move Speed", "move_speed_bonus": 35, "max_copies": 2},
+	{"id": "targeting_system", "name": "Targeting System", "type": "Item", "description": "Execute a damaged enemy at or below 15% HP on a successful attack.", "execute_threshold": 0.15, "max_copies": 1},
+	{"id": "rapid_cycle_mechanism", "name": "Rapid Cycle Mechanism", "type": "Item", "description": "-0.20s Attack Cooldown", "cooldown_reduction": 0.20, "max_copies": 2},
+	{"id": "reactive_exoframe", "name": "Reactive Exoframe", "type": "Item", "description": "+60 Maximum Health. Gain a 20 HP shield the first time HP drops below 50% each round.", "health_bonus": 60, "reactive_shield": 20, "max_copies": 1},
+	{"id": "long_barrel_conversion", "name": "Long-Barrel Conversion", "type": "Item", "description": "+1 hex Attack Range. Attacks beyond natural range deal 25% less damage at +1 hex and 40% less at +2 hexes. Attacks within natural range deal full damage.", "range_hex_bonus": 1, "max_copies": 1},
+	{"id": "rapid_chamber", "name": "Rapid Chamber", "type": "Item", "description": "Every 4th basic attack adds one extra hit for 50% damage.", "bonus_hit_every": 4, "max_copies": 1}
 ]
-
 
 # =========================================================
 # CLASS UPGRADES
@@ -500,9 +422,14 @@ func get_upgrade_pool(
 	var upgrade_pool: Array = []
 
 
-	# Repeatable equipment.
+	# Equipment may be selected again only up to its explicit copy limit.
 	for item in equipment:
-		upgrade_pool.append(item)
+		var owned_count: int = 0
+		for owned in GameState.character_upgrades.get(character_name, []):
+			if owned.get("id", "") == item["id"]:
+				owned_count += 1
+		if owned_count < int(item.get("max_copies", 1)):
+			upgrade_pool.append(item)
 
 
 	var character_data: CharacterData = (
