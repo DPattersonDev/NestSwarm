@@ -68,3 +68,25 @@ static func neighbors(cell: Vector2i) -> Array[Vector2i]:
 	return result
 static func backline(position: Vector2, enemy: bool, rows: int) -> bool:
 	return from_global(nearest(position), enemy).y < rows
+
+# Shortest traversable hex-step distance on the existing staggered board.
+static func hex_steps(from_cell: Vector2i, to_cell: Vector2i) -> int:
+	if from_cell == to_cell:
+		return 0
+	if not valid_global(from_cell) or not valid_global(to_cell):
+		return 999
+	var visited := {from_cell: 0}
+	var queue: Array[Vector2i] = [from_cell]
+	var cursor := 0
+	while cursor < queue.size():
+		var cell: Vector2i = queue[cursor]
+		cursor += 1
+		for next_cell in neighbors(cell):
+			if visited.has(next_cell):
+				continue
+			var steps: int = visited[cell] + 1
+			if next_cell == to_cell:
+				return steps
+			visited[next_cell] = steps
+			queue.append(next_cell)
+	return 999
