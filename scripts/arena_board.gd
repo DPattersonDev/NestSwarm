@@ -41,14 +41,13 @@ func register(unit) -> void:
 	unit.position = Layout.center(cell)
 func free_for(cell: Vector2i, id: int) -> bool:
 	return not occupants.has(cell) or occupants[cell] == id
-func in_range(unit, victim, position: Vector2, cell: Vector2i, distance: float) -> bool:
-	if position.distance_to(victim.position) <= distance:
-		return true
-	# Melee reaches an adjacent hex even when perspective widens a stone.
-	if unit.character_data.class_role not in ["Marksman", "Support"]:
-		var target_cell := Layout.nearest(victim.position)
-		return target_cell in Layout.neighbors(cell)
-	return false
+func in_range(unit, victim, position: Vector2, cell: Vector2i, _distance: float) -> bool:
+	# Combat range uses board hex steps rather than art-dependent pixels.
+	# Preview scenes without HexBattlefield keep their existing pixel logic.
+	var target_cell: Vector2i = Layout.nearest(victim.position)
+	var steps: int = Layout.hex_steps(cell, target_cell)
+	return steps <= unit.get_attack_range_hexes()
+
 func route(unit, victim, distance: float) -> Array[Vector2i]:
 	var id: int = unit.get_instance_id()
 	var start: Vector2i = units[id].cell
