@@ -51,7 +51,7 @@ const MIN_ATTACK_COOLDOWN: float = 0.25
 #
 # Special = Gold
 # Class   = Green
-# Item    = Crimson / Red
+# Item    = Sapphire / Blue
 # =========================================================
 
 const SPECIAL_NORMAL_COLOR: Color = Color(0.24, 0.18, 0.05, 1.0)
@@ -64,10 +64,10 @@ const CLASS_HOVER_COLOR: Color = Color(0.09, 0.27, 0.13, 1.0)
 const CLASS_PRESSED_COLOR: Color = Color(0.05, 0.15, 0.07, 1.0)
 const CLASS_BORDER_COLOR: Color = Color(0.25, 0.78, 0.38, 1.0)
 
-const ITEM_NORMAL_COLOR: Color = Color(0.22, 0.07, 0.07, 1.0)
-const ITEM_HOVER_COLOR: Color = Color(0.30, 0.09, 0.09, 1.0)
-const ITEM_PRESSED_COLOR: Color = Color(0.16, 0.05, 0.05, 1.0)
-const ITEM_BORDER_COLOR: Color = Color(0.78, 0.24, 0.24, 1.0)
+const ITEM_NORMAL_COLOR: Color = Color(0.065, 0.13, 0.28, 1.0)
+const ITEM_HOVER_COLOR: Color = Color(0.095, 0.20, 0.41, 1.0)
+const ITEM_PRESSED_COLOR: Color = Color(0.045, 0.10, 0.22, 1.0)
+const ITEM_BORDER_COLOR: Color = Color(0.35, 0.67, 0.98, 1.0)
 
 const NEUTRAL_NORMAL_COLOR: Color = Color(0.16, 0.16, 0.16, 1.0)
 const NEUTRAL_HOVER_COLOR: Color = Color(0.20, 0.20, 0.20, 1.0)
