@@ -1,13 +1,22 @@
 extends Control
 
-const BACKGROUND := preload("res://Art/Menu/veyra_melora.webp")
+const BACKGROUNDS := {
+	"veyra_melora": preload("res://Art/Menu/veyra_melora.webp"),
+	"aurex_brontis": preload("res://Art/Menu/aurex_brontis.webp"),
+	"zekrin_nyxis": preload("res://Art/Menu/zekrin_nyxis.webp"),
+	"full_roster": preload("res://Art/Menu/full_roster.webp"),
+}
+const FIRST_BACKGROUND := "veyra_melora"
+const ROTATION_SAVE := "user://menu_background.cfg"
 const BUTTON_SIZE := Vector2(236, 46)
+
+static var session_background := ""
 
 
 func _ready() -> void:
 	var background := TextureRect.new()
 	background.name = "Background"
-	background.texture = BACKGROUND
+	background.texture = _background_for_session()
 	background.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	background.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	background.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -68,6 +77,41 @@ func _ready() -> void:
 	buttons.add_child(_menu_button("PRIVATE PVP TEST", _on_pvp_button_pressed))
 	buttons.add_child(_menu_button("CHARACTERS", _on_character_button_pressed))
 	buttons.add_child(_menu_button("SETTINGS", _on_settings_button_pressed))
+
+
+func _background_for_session() -> Texture2D:
+	if not session_background.is_empty():
+		return BACKGROUNDS[session_background]
+
+	var config := ConfigFile.new()
+	var last: String = ""
+	var remaining: Array[String] = []
+	if config.load(ROTATION_SAVE) == OK:
+		var saved_last = config.get_value("rotation", "last", "")
+		if BACKGROUNDS.has(saved_last):
+			last = saved_last
+		var saved_remaining = config.get_value("rotation", "remaining", [])
+		if saved_remaining is Array:
+			for id in saved_remaining:
+				if id != last and BACKGROUNDS.has(id) and not remaining.has(id):
+					remaining.append(id)
+
+	if remaining.is_empty():
+		remaining.assign(BACKGROUNDS.keys())
+		remaining.shuffle()
+		if last.is_empty():
+			remaining.erase(FIRST_BACKGROUND)
+			remaining.push_front(FIRST_BACKGROUND)
+		elif remaining[0] == last and remaining.size() > 1:
+			remaining.push_back(remaining.pop_front())
+
+	session_background = remaining.pop_front()
+	config.set_value("rotation", "last", session_background)
+	config.set_value("rotation", "remaining", remaining)
+	var save_error := config.save(ROTATION_SAVE)
+	if save_error != OK:
+		push_warning("Could not save the home-screen background rotation: " + error_string(save_error))
+	return BACKGROUNDS[session_background]
 
 
 func _menu_button(text: String, action: Callable, primary: bool = false) -> Button:
